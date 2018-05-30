@@ -12,6 +12,6 @@ class Index extends Common
         $res['code'] = 0;
         $res['msg'] = '登录成功';
         
-        return json_encode($res);
+        return json_encode($res, JSON_UNESCAPED_UNICODE);
     }
 }
