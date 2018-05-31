@@ -20,6 +20,7 @@ class Index extends Common
         $arr['phone'] = $this->request->post('phone');
         $member = new Member();
         $member->phone = $arr['phone'];
+        $member->create_time = date('Y-m-d H:i:s', time());
         $member->save();
       
         return json_encode($arr);
