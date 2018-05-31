@@ -17,11 +17,22 @@ class Index extends Common
     }
     public function register(){
         $arr =array();
-        $arr['phone'] = $this->request->post('phone');
+        
         $member = new Member();
-        $member->phone = $arr['phone'];
+        $member->phone = $this->request->post('phone');
+        $member->username = $this->request->post('username'); 
+        $member->passwd = md5($this->request->post('passwd')) ?? " ";
+        $member->update_time = date('Y-m-d H:i:s', time());
         $member->create_time = date('Y-m-d H:i:s', time());
-        $member->save();
+        $res = $member->save();
+        if ($res) {
+            $arr['code'] = 0;
+            $arr['msg'] = '注册成功';
+        } else {
+            $arr['code'] = -1;
+            $arr['msg'] = '注册失败';
+        }
+        
       
         return json_encode($arr);
     }
