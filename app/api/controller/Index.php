@@ -2,6 +2,7 @@
 namespace app\api\controller;
 
 use app\common\controller\Common;
+use app\api\model\Member;
 
 class Index extends Common
 {
@@ -17,13 +18,10 @@ class Index extends Common
     public function register(){
         $arr =array();
         $arr['phone'] = $this->request->post('phone');
-        $result = Db::name('phone');
-        echo $result;
-        if(is_inarray($arr['phone'],$result)){
-            
-        }
-        
-        
-        
+        $member = new Member();
+        $member->phone = $arr['phone'];
+        $member->save();
+      
+        return json_encode($arr);
     }
 }
