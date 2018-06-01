@@ -1,9 +1,9 @@
 <?php
 namespace app\api\controller;
-
+// use app\api\validate;
 use app\common\controller\Common;
 use app\api\model\Member;
-require_once 'app/api/Validate.php';
+// require_once '../Validate.php';
 class Index extends Common
 {
   
