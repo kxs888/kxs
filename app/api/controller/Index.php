@@ -23,14 +23,14 @@ class Index extends Common
         if(!$this->isPhone($member->phone)){
             $arr['code'] = -1;
             $arr['msg'] = '注册失败';
-            return json_encode($arr);
+            return $arr;
             
         }
         
         $member->username = $this->request->post('username'); 
         $member->passwd = md5($this->request->post('passwd')) ?? " ";
-        $member->update_time = date('Y-m-d H:i:s', time());
-        $member->create_time = date('Y-m-d H:i:s', time());
+//         $member->update_time = date('Y-m-d H:i:s', time());
+        $member->create_time = time();
         $res = $member->save();
         if ($res) {
             $arr['code'] = 0;

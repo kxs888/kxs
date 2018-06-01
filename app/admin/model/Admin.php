@@ -13,7 +13,7 @@ use think\Model;
  */
 class Admin extends Common
 {
-    //格式化请求参数
+    //格式 
     protected function fmtRequest( $request = [] )
     {
         if( empty($request) ) {
