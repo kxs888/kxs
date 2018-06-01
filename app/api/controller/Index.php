@@ -20,7 +20,7 @@ class Index extends Common
         
         $arr = array();
         $mem = new Member();
-        $mem->phone = input('username');
+        $mem->phone = input('phone');
         $mem->username = input('username');
         $mem->passwd = input('passwd');
         if (!isPhone($mem->phone)) {
