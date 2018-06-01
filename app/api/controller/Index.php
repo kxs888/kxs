@@ -17,12 +17,10 @@ class Index extends Common
     public function register(){
      
         $arr = array();
-        $member = new Member();
-        $menber->phone = 555555;
-        dump( $men->phone);
-        die();
-        $men->username = input('username');
-        $men->passwd = input('passwd');
+        $mem = new Member();
+        $mem->phone = input('username');
+        $mem->username = input('username');
+        $mem->passwd = input('passwd');
         if (!isPhone($men->phone)) {
             $arr['code'] = -1;
             $arr['msg'] = '电话不正确';
