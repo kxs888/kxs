@@ -16,11 +16,12 @@ class Index extends Common
         return json_encode($res, JSON_UNESCAPED_UNICODE);
     }
     public function register(){
-        dump(input('phone'));
-        die();
+     
         $arr = array();
         $mem = new Member();
-        $men->phone = input('phone');
+        $men->phone = 555555;
+        dump( $men->phone);
+        die();
         $men->username = input('username');
         $men->passwd = input('passwd');
         if (!isPhone($men->phone)) {
