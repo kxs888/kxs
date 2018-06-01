@@ -3,7 +3,7 @@ namespace app\api\controller;
 use app\common\controller\Common;
 use app\api\model\Member;
 use app\api\Validate;
-include '../validate/Validate.php';
+// include '../validate/Validate.php';
 class Index extends Common
 {
   
