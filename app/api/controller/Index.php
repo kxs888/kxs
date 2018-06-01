@@ -100,7 +100,7 @@ class Index extends Common
         
         
         
-    }
+    
 //         $arr =array();
         
 //         $member = new Member();
