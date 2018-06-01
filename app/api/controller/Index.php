@@ -23,15 +23,15 @@ class Index extends Common
         $mem->phone = input('username');
         $mem->username = input('username');
         $mem->passwd = input('passwd');
-        if (!isPhone($men->phone)) {
+        if (!isPhone($mem->phone)) {
             $arr['code'] = -1;
             $arr['msg'] = '电话不正确';
             
-        } elseif (!isUsername($men->username)){
+        } elseif (!isUsername($mem->username)){
             
             $arr['msg'] = '用户名格式不正确';
             
-        } elseif(!isPWD($men->passwd)){
+        } elseif(!isPWD($mem->passwd)){
             
             $arr['msg'] = '密码不正确';
         } else{
