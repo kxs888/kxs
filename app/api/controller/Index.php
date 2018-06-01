@@ -16,6 +16,7 @@ class Index extends Common
     }
     public function register(){
      
+        
         $arr = array();
         $mem = new Member();
         $mem->phone = input('username');
