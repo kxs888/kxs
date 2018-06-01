@@ -53,7 +53,7 @@ class Index extends Common
             return false;
         }
     
-        function isUsername($username){
+     public   function isUsername($username){
             //中英文6-20个字符正则
             $preg='/^[a-zA-Z\x{4e00}-\x{9fa5}]{6,20}$/u';
             $n = preg_match($preg,$username);
@@ -63,7 +63,7 @@ class Index extends Common
                 return false;
             }
     
-            function isPWD($passwd){
+      public      function isPWD($passwd){
                 $n = preg_match('/^([a-zA-Z0-9]){6,16}$/', $password);
                 if($n != 0){
                     return true;
