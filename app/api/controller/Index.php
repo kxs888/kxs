@@ -16,7 +16,7 @@ class Index extends Common
         return json_encode($res, JSON_UNESCAPED_UNICODE);
     }
     public function register(){
-        vr_dump(input('phone'));
+        dump(input('phone'));
         die();
         $arr = array();
         $mem = new Member();
