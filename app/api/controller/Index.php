@@ -17,7 +17,7 @@ class Index extends Common
     public function register(){
      
         $arr = array();
-        $mem = new Member();
+        $mem = model(Member);
         $men->phone = 555555;
         dump( $men->phone);
         die();
