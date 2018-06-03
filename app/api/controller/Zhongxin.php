@@ -50,7 +50,7 @@ class Zhongxin extends Controller {
         $black = imagecolorallocate($img,91,51,14);//字体颜色 RGB
         $fontSize = 20;   //字体大小
         $circleSize = 0; //旋转角度
-        $nicheng = ;
+        $nicheng ='';
         $name = "-".$nicheng."的绝配新主义-";      
         $fontBox = imagettfbbox($fontSize, 0, $font, $name);
         imagefttext($img, $fontSize, $circleSize, ceil(($width - $fontBox[2])/2), 792, $black, $font, $name);   
