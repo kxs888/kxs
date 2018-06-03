@@ -7,7 +7,9 @@ class Zhongxin extends Controller {
         header("Access-Control-Allow-Origin:*");
     } 
     public function index(){
-        return 'index';
+        
+        var_dump(gd_info());
+        //return 'index';
     }
      
      //touxiang头像图片地址
