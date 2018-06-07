@@ -15,6 +15,14 @@ class Image{
         imagecopymerge($image1, $image2, 0, 0, 0, 0, imagesx($image2)/2, imagesy($image2), 100);  
         // 输出合成图片  
         // $imagename = rand(1000,9999).'-'.time().'jpg';
+        $name = input('post.name');
+        $font = '../public/static/admin/lib/fangzheng.ttf';
+        $black = imagecolorallocate($img, 100, 100,100);//字体颜色 RGB
+        $fontSize = 20;
+        $circleSize = 0;
+        $fontBox = imagettfbbox($fontSize, 0, $font, $name);
+        imagettext($image1,$fontSize,$circleSize,0,0,$black,$font,$name);
+        
         
         
         header('Content-Type:image/jpeg');
@@ -27,25 +35,25 @@ class Image{
         return "http://kxs.ruohua.club/static/admin/images/a.jpg";
     
     }
-    public function textMerge(){
-        $name = input('post.name');
-        $img = rand(1,5).'.jpg';
-        $path = "..public/static/admin/images/$img";
-        $image = imagecreatefromjpeg($path);
-        dump($image);
-        $black = imagecolorallocate($img, 100, 100,100);//字体颜色 RGB
-        $ttf = '../public/static/admin/lib/fangzheng.ttf';
-        imagefttext($image,16,355,20,20,$black,$ttf,$name);
-        $idimg = rand(1000,9999).'jpg';
+//     public function textMerge(){
+//         $name = input('post.name');
+//         $img = rand(1,5).'.jpg';
+//         $path = "..public/static/admin/images/$img";
+//         $image = imagecreatefromjpeg($path);
+//         dump($image);
+//         $black = imagecolorallocate($img, 100, 100,100);//字体颜色 RGB
+//         $ttf = '../public/static/admin/lib/fangzheng.ttf';
+//         imagefttext($image,16,355,20,20,$black,$ttf,$name);
+//         $idimg = rand(1000,9999).'jpg';
 
-        header('Content-Type:image/jpeg');
-        imagejpeg($image,'../public/static/admin/images/$idimg');
+//         header('Content-Type:image/jpeg');
+//         imagejpeg($image,"../public/static/admin/images/$idimg");
         
-        //释放内存
-        imagedestroy($image); 
+//         //释放内存
+//         imagedestroy($image); 
         
-        return "http://kxs.ruohua.club/static/admin/images/$idimg";
+//         return "http://kxs.ruohua.club/static/admin/images/$idimg";
         
         
-    }
+//     }
 }
