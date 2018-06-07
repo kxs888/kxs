@@ -46,7 +46,7 @@ class Zhongxin extends Controller {
         $font = "/data/wwwroot/tengshi.bjsidao.com/20180104lulu/ditu/fangzheng.ttf";//字体
         $img = imagecreatefromstring(file_get_contents($bigImgPath));
         $width = imagesx($img);
-        $height = imagesy($img);
+        $height = imagesy($img);  
 
         //文字合成
         $black = imagecolorallocate($img,91,51,14);//字体颜色 RGB
@@ -73,7 +73,7 @@ class Zhongxin extends Controller {
         header('Content-Type:image/jpg');
         imagejpeg($img, "/data/wwwroot/tengshi.bjsidao.com/20180104lulu/img/".$imgname);//输出图像
 
-        imagedestroy($qCodeImg);
+        imagedestroy($qCodeImg); 
         imagedestroy($img);//释放内存
         return "http://tengshi.bjsidao.com/20180104lulu/img/".$imgname;
     }
