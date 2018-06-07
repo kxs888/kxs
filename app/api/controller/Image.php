@@ -27,7 +27,7 @@ class Image{
         return "http://kxs.ruohua.club/static/admin/images/a.jpg";
     
     }
-    public function textMerge($name){
+    public function textMerge(){
         $name = input('post.name');
         $img = rand(1,5).'jpg';
         $path = '../public/static/admin/images/$img';
