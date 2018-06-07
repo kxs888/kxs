@@ -17,7 +17,7 @@ class Image{
         // 输出合成图片  
         // $imagename = rand(1000,9999).'-'.time().'jpg';
         $request = Request::instance();
-        $name = $requset->param();
+        $name = $requset->only(['name']);
         echo $name;  
         die();   
         $font = '../public/static/admin/lib/fangzheng.ttf';
