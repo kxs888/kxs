@@ -21,7 +21,7 @@ class Image{
         $fontSize = 20;
         $circleSize = 0;
         $fontBox = imagettfbbox($fontSize, 0, $font, $name);
-        imagettext($image1,$fontSize,$circleSize,0,0,$black,$font,$name);
+        imagefttext($image1,$fontSize,$circleSize,0,0,$black,$font,$name);
         
         
         
