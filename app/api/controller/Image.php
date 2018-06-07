@@ -3,7 +3,7 @@ namespace app\api\controller;
 use think\Request;
 class Image{
     
-    public function imageMerge($name){
+    public function imageMerge(){
            
         // 图片一  
         $path1 = '../public/static/admin/images/3.jpg';  
