@@ -16,6 +16,8 @@ class Image{
         // 输出合成图片  
         // $imagename = rand(1000,9999).'-'.time().'jpg';
         $name = input('post.name');
+        echo $name;
+        die();
         $font = '../public/static/admin/lib/fangzheng.ttf';
         $black = imagecolorallocate($image1, 100, 100,100);//字体颜色 RGB
         $fontSize = 20;
