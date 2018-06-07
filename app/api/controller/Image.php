@@ -11,7 +11,7 @@ class Image{
         $path2 = '../public/static/admin/images/1.jpg';  
         // 创建图片对象  1
         $image1 = imagecreatefromjpeg($path1);  
-        $image2 = imagecreatefromjpeg($path2);  
+        $image2 = imagecreatefromjpeg($path2); 
         // 合成图片  
         imagecopymerge($image1, $image2, 0, 0, 0, 0, imagesx($image2), imagesy($image2), 100);  
         // 输出合成图片  
