@@ -18,7 +18,7 @@ class Image{
         // $imagename = rand(1000,9999).'-'.time().'jpg';
         $request = Request::instance();
         $name = $requset->post('name');
-        echo $name;
+        echo $name;  
         die();
         $font = '../public/static/admin/lib/fangzheng.ttf';
         $black = imagecolorallocate($image1, 100, 100,100);//字体颜色 RGB
