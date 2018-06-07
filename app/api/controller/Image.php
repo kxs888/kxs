@@ -19,7 +19,7 @@ class Image{
         $font = '../public/static/admin/lib/fangzheng.ttf';
         $black = imagecolorallocate($image1, 100, 100,100);//字体颜色 RGB
         $fontSize = 20;
-        $circleSize = 0;
+        $circleSize = 0;  
         $fontBox = imagettfbbox($fontSize, 0, $font, $name);
         imagefttext($image1,$fontSize,$circleSize,0,0,$black,$font,$name);
         
