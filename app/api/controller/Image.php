@@ -1,5 +1,6 @@
 <?php    
 namespace app\api\controller;
+use think\Request;
 class Image{
     
     public function imageMerge($name){
@@ -15,7 +16,8 @@ class Image{
         imagecopymerge($image1, $image2, 0, 0, 0, 0, imagesx($image2), imagesy($image2), 100);  
         // 输出合成图片  
         // $imagename = rand(1000,9999).'-'.time().'jpg';
-        $name = input('post.name');
+        $requset = new Request();
+        $name = $requset->post['name'];
         echo $name;
         die();
         $font = '../public/static/admin/lib/fangzheng.ttf';
