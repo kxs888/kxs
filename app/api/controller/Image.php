@@ -9,8 +9,8 @@ class Image{
     // 图片二  
     $path2 = '../public/static/admin/images/3.jpg';  
     // 创建图片对象  
-    $image1 = imagecreatefromjpeg($path_1);  
-    $image2 = imagecreatefromjpeg($path_2);  
+    $image1 = imagecreatefromjpeg($path1);  
+    $image2 = imagecreatefromjpeg($path2);  
     // 合成图片  
     imagecopymerge($image1, $image2, 0, 0, 0, 0, imagesx($image_2)/2, imagesy($image_2), 100);  
     // 输出合成图片  
