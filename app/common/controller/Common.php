@@ -29,4 +29,5 @@ class Common extends Controller
         }
         return 'zh-cn';
     }
+    
 }
