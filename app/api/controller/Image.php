@@ -12,7 +12,7 @@ class Image{
     $image1 = imagecreatefromjpeg($path1);  
     $image2 = imagecreatefromjpeg($path2);  
     // 合成图片  
-    imagecopymerge($image1, $image2, 0, 0, 0, 0, imagesx($image_2)/2, imagesy($image_2), 100);  
+    imagecopymerge($image1, $image2, 0, 0, 0, 0, imagesx($image2)/2, imagesy($image2), 100);  
     // 输出合成图片  
     $imagename = rand(1000,9999).'-'.time().'jpg';
     header('Content-Type:image/jpeg');
