@@ -1,7 +1,8 @@
 <?php
 namespace app\api\Validate;
 
-class Validate {
+
+trait Validate {
     
     public function isPhone($phone){
         if(strlen($phone) == 11){
