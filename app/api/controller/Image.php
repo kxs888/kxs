@@ -17,7 +17,7 @@ class Image{
         // $imagename = rand(1000,9999).'-'.time().'jpg';
         $name = input('post.name');
         $font = '../public/static/admin/lib/fangzheng.ttf';
-        $black = imagecolorallocate($img, 100, 100,100);//字体颜色 RGB
+        $black = imagecolorallocate($image1, 100, 100,100);//字体颜色 RGB
         $fontSize = 20;
         $circleSize = 0;
         $fontBox = imagettfbbox($fontSize, 0, $font, $name);
