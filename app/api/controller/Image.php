@@ -41,7 +41,7 @@ class Image{
         imagejpeg($image,'../public/static/admin/images/$idimg');
         
         //释放内存
-        imagedestroy($image);
+        imagedestroy($image); 
         
         return "http://kxs.ruohua.club/static/admin/images/$idimg";
         
