@@ -38,7 +38,7 @@ class Image{
         $idimg = rand(1000,9999).'jpg';
 
         header('Content-Type:image/jpeg');
-        imagejpeg($image1,'../public/static/admin/images/$idimg');
+        imagejpeg($image,'../public/static/admin/images/$idimg');
         
         //释放内存
         imagedestroy($image);
