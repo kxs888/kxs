@@ -9,7 +9,7 @@ class Image{
         $path1 = '../public/static/admin/images/3.jpg';  
         // 图片二  
         $path2 = '../public/static/admin/images/1.jpg';  
-        // 创建图片对象  
+        // 创建图片对象  1212122
         $image1 = imagecreatefromjpeg($path1);  
         $image2 = imagecreatefromjpeg($path2);  
         // 合成图片  
