@@ -32,6 +32,7 @@ class Image{
         $img = rand(1,5).'.jpg';
         $path = "..public/static/admin/images/$img";
         $image = imagecreatefromjpeg($path);
+        dump($image);
         $black = imagecolorallocate($img, 100, 100,100);//字体颜色 RGB
         $ttf = '../public/static/admin/lib/fangzheng.ttf';
         imagefttext($image,16,355,20,20,$black,$ttf,$name);
