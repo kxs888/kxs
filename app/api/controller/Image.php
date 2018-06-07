@@ -25,7 +25,7 @@ class Image{
         
         
         
-        header('Content-Type:image/jpeg');
+        header('Content-Type:image/jpeg'); 
         imagejpeg($image1,'../public/static/admin/images/a.jpg');
         
         //释放内存
