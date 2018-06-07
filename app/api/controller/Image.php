@@ -7,7 +7,7 @@ class Image{
            
         // 图片一  
         $path1 = '../public/static/admin/images/3.jpg';  
-        // 图片二  
+        // 图片二   
         $path2 = '../public/static/admin/images/1.jpg';  
         // 创建图片对象  1
         $image1 = imagecreatefromjpeg($path1);   
