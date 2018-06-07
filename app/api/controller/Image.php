@@ -30,9 +30,7 @@ class Image{
     public function textMerge(){
         $name = input('post.name');
         $img = rand(1,5).'.jpg';
-        $path = '..public/static/admin/images/$img';
-        echo $path;
-        exit();
+        $path = "..public/static/admin/images/$img";
         $image = imagecreatefromjpeg($path);
         $black = imagecolorallocate($img, 100, 100,100);//字体颜色 RGB
         $ttf = '../public/static/admin/lib/fangzheng.ttf';
