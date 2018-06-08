@@ -45,3 +45,4 @@ class Index extends Common
         }
         return $array;
     }   
+}
