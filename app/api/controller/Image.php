@@ -5,7 +5,7 @@ class Image{
     
     public function imageMerge($arr){
         $arr = input('post.');
-        echo $name;
+        dump($name);
         die();
         // 图片一  
         $path1 = '../public/static/admin/images/3.jpg';  
