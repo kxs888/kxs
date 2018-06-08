@@ -10,7 +10,7 @@ class Index extends Common
     public function login(){
         $array = array();
         $res = input('post.');
-        $user = Db::name('user')->where('phone',$res['phone'])->find();
+        $user = Db::name('user')->where('phone',$res['phone'])->select();
         if(!$user){
             $array['code'] = -1;
             $array['msg']  = '用户不存在';
