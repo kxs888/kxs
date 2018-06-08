@@ -35,7 +35,7 @@ class Index extends Common
         $user1->username = input('username');
         $user1->phone = input('phone');
         $user1->passwd = input('passwd');
-        $res = $this->save();
+        $res = $user1->save();
         if(!$res){
             $array['code'] = -1;
             $array['msg'] = '保存失败';
