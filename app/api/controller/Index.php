@@ -30,15 +30,6 @@ class Index extends Common
         
     }  
         
-        
-        
-//         $res = array();
-//         $phone = $this->request->post("phone");
-//         $res['code'] = 0;
-//         $res['msg'] = '登录成功';
-        
-//         return json_encode($res, JSON_UNESCAPED_UNICODE);
-    
     public function register(){
         $array = array();
         $user1 = new User();
@@ -54,10 +45,6 @@ class Index extends Common
             $array['msg'] = '保存成功';
         }
         return $array;
-        
-        
-        
-        
     }
      
         
@@ -118,6 +105,30 @@ class Index extends Common
 //         }
 //     }
 // }  
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
     
 //         $arr =array();
