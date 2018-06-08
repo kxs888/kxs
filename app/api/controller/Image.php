@@ -4,8 +4,9 @@ use think\Controller;
 class Image{
     
     public function imageMerge($arr){
-        $arr['name'] = input('post.name');
+        $arr = input('post.');
         echo $name;
+        die();
         // 图片一  
         $path1 = '../public/static/admin/images/3.jpg';  
         // 图片二   
