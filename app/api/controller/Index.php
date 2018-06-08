@@ -44,6 +44,6 @@ class Index extends Common
             $array['code'] = 0;
             $array['msg'] = '保存成功';
         }
-        return $array;
+        return json_encode($array);
     }   
 }
