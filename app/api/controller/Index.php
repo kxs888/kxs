@@ -40,65 +40,84 @@ class Index extends Common
 //         return json_encode($res, JSON_UNESCAPED_UNICODE);
     
     public function register(){
+        $array = array();
+        $user1 = new User();
+        $user1->username = input('username');
+        $user1->phone = input['phone'];
+        $user1->passwd = input('passwd');
+        $res = $this->save();
+        if(!$res){
+            $array['code'] = -1;
+            $array['msg'] = '保存失败';
+        } else  {
+            $array['code'] = 0;
+            $array['msg'] = '保存成功';
+        }
+        return $array;
+        
+        
+        
+        
+    }
      
         
-        $arr = array();
-        $mem = new Member();
-        $mem->phone = input('phone');
-        $mem->username = input('username');
-        $mem->passwd = input('passwd');
-        if (!isPhone($mem->phone)) {
-            $arr['code'] = -1;
-            $arr['msg'] = '电话不正确';
+//         $arr = array();
+//         $mem = new Member();
+//         $mem->phone = input('phone');
+//         $mem->username = input('username');
+//         $mem->passwd = input('passwd');
+//         if (!isPhone($mem->phone)) {
+//             $arr['code'] = -1;
+//             $arr['msg'] = '电话不正确';
             
-        } elseif (!isUsername($mem->username)){
+//         } elseif (!isUsername($mem->username)){
             
-            $arr['msg'] = '用户名格式不正确';
+//             $arr['msg'] = '用户名格式不正确';
             
-        } elseif(!isPWD($mem->passwd)){
+//         } elseif(!isPWD($mem->passwd)){
             
-            $arr['msg'] = '密码不正确';
-        } else{
-            $arr['code'] = 0;
-            $arr['msg'] = '注册成功';
-        }
+//             $arr['msg'] = '密码不正确';
+//         } else{
+//             $arr['code'] = 0;
+//             $arr['msg'] = '注册成功';
+//         }
         
-              return json_encode($arr);
+//               return json_encode($arr);
         
         
-    }
-    public function isPhone($phone){
-        if(strlen($phone) == 11){
-            $n = preg_match("/13[123569]{1}\d{8}|15[1235689]\d{8}|188\d{8}/",$phone);
-            if($n != 0){
-                return true;
-            }
-        } else{
-            return false;
-        }
+//     }
+//     public function isPhone($phone){
+//         if(strlen($phone) == 11){
+//             $n = preg_match("/13[123569]{1}\d{8}|15[1235689]\d{8}|188\d{8}/",$phone);
+//             if($n != 0){
+//                 return true;
+//             }
+//         } else{
+//             return false;
+//         }
     
-       function isUsername($username){
-            //中英文6-20个字符正则
-            $preg='/^[a-zA-Z\x{4e00}-\x{9fa5}]{6,20}$/u';
-            $n = preg_match($preg,$username);
-            if($n != 0){
-                return true;
-            } else {
-                return false;
-            }
+//        function isUsername($username){
+//             //中英文6-20个字符正则
+//             $preg='/^[a-zA-Z\x{4e00}-\x{9fa5}]{6,20}$/u';
+//             $n = preg_match($preg,$username);
+//             if($n != 0){
+//                 return true;
+//             } else {
+//                 return false;
+//             }
     
-      function isPWD($passwd){
-                $n = preg_match('/^([a-zA-Z0-9]){6,16}$/', $password);
-                if($n != 0){
-                    return true;
-                } else {
-                    return false;
-                }
+//       function isPWD($passwd){
+//                 $n = preg_match('/^([a-zA-Z0-9]){6,16}$/', $password);
+//                 if($n != 0){
+//                     return true;
+//                 } else {
+//                     return false;
+//                 }
     
-            }
-        }
-    }
-}  
+//             }
+//         }
+//     }
+// }  
         
         
         
