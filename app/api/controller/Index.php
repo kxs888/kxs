@@ -14,7 +14,9 @@ class Index extends Common
         if(!$user){
             $array['code'] = -1;
             $array['msg']  = '用户不存在';
-        } elseif (md5($res['passwd']) != ($user['passwd'])){
+            return json_encode($array,JSON_UNESCAPED_UNICODE);
+        } 
+        if (md5($res['passwd']) != ($user['passwd'])){
             $array['code'] = -1;
             $array['msg']  = '密码不正确';
         } else {
