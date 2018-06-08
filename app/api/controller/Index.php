@@ -3,7 +3,7 @@ namespace app\api\controller;
 use app\common\controller\Common;
 use think\Db;
 use app\api\model\User;
-use app\api\Validate;
+use app\api\Validate\Validate;
 
 class Index extends Common
 {
