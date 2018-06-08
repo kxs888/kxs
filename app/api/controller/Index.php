@@ -37,6 +37,11 @@ class Index extends Common
         $user1->phone = input('phone');
         $user1->passwd = md5(input('passwd'));
         $user1->create_time = input('create_time');
+        $res = Db::name('user')->where('phone',$user->phone)->find();
+        if(!empty($res)){
+            $array['code'] = -1;
+            $array['msg'] = '已注册';
+        } else {
         if (!Validate::isPhone($user1->phone)) {
             $array['code'] = -1;
             $array['msg'] = '手机号不正确';
@@ -53,8 +58,10 @@ class Index extends Common
                 $array['code'] = 0;
                 $array['msg'] = '保存成功';
             } 
+            
         }
-       
+//         return json_encode($array);
+    }
         return json_encode($array);
     }   
 }
