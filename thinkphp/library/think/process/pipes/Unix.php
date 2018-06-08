@@ -8,7 +8,6 @@
 // +----------------------------------------------------------------------
 // | Author: yunwuxin <448901948@qq.com>
 // +----------------------------------------------------------------------
-
 namespace think\process\pipes;
 
 use think\Process;
@@ -18,17 +17,19 @@ class Unix extends Pipes
 
     /** @var bool */
     private $ttyMode;
+
     /** @var bool */
     private $ptyMode;
+
     /** @var bool */
     private $disableOutput;
 
     public function __construct($ttyMode, $ptyMode, $input, $disableOutput)
     {
-        $this->ttyMode       = (bool) $ttyMode;
-        $this->ptyMode       = (bool) $ptyMode;
+        $this->ttyMode = (bool) $ttyMode;
+        $this->ptyMode = (bool) $ptyMode;
         $this->disableOutput = (bool) $disableOutput;
-
+        
         if (is_resource($input)) {
             $this->input = $input;
         } else {
@@ -42,45 +43,80 @@ class Unix extends Pipes
     }
 
     /**
+     *
      * {@inheritdoc}
+     *
      */
     public function getDescriptors()
     {
         if ($this->disableOutput) {
             $nullstream = fopen('/dev/null', 'c');
-
+            
             return [
-                ['pipe', 'r'],
+                [
+                    'pipe',
+                    'r'
+                ],
                 $nullstream,
-                $nullstream,
+                $nullstream
             ];
         }
-
+        
         if ($this->ttyMode) {
             return [
-                ['file', '/dev/tty', 'r'],
-                ['file', '/dev/tty', 'w'],
-                ['file', '/dev/tty', 'w'],
+                [
+                    'file',
+                    '/dev/tty',
+                    'r'
+                ],
+                [
+                    'file',
+                    '/dev/tty',
+                    'w'
+                ],
+                [
+                    'file',
+                    '/dev/tty',
+                    'w'
+                ]
             ];
         }
-
+        
         if ($this->ptyMode && Process::isPtySupported()) {
             return [
-                ['pty'],
-                ['pty'],
-                ['pty'],
+                [
+                    'pty'
+                ],
+                [
+                    'pty'
+                ],
+                [
+                    'pty'
+                ]
             ];
         }
-
+        
         return [
-            ['pipe', 'r'],
-            ['pipe', 'w'], // stdout
-            ['pipe', 'w'], // stderr
-        ];
+            [
+                'pipe',
+                'r'
+            ],
+            [
+                'pipe',
+                'w'
+            ], // stdout
+            [
+                'pipe',
+                'w'
+            ]
+        ] // stderr
+;
     }
 
     /**
+     *
      * {@inheritdoc}
+     *
      */
     public function getFiles()
     {
@@ -88,56 +124,63 @@ class Unix extends Pipes
     }
 
     /**
+     *
      * {@inheritdoc}
+     *
      */
     public function readAndWrite($blocking, $close = false)
     {
-
-        if (1 === count($this->pipes) && [0] === array_keys($this->pipes)) {
+        if (1 === count($this->pipes) && [
+            0
+        ] === array_keys($this->pipes)) {
             fclose($this->pipes[0]);
             unset($this->pipes[0]);
         }
-
+        
         if (empty($this->pipes)) {
             return [];
         }
-
+        
         $this->unblock();
-
+        
         $read = [];
-
+        
         if (null !== $this->input) {
-            $r = array_merge($this->pipes, ['input' => $this->input]);
+            $r = array_merge($this->pipes, [
+                'input' => $this->input
+            ]);
         } else {
             $r = $this->pipes;
         }
-
+        
         unset($r[0]);
-
-        $w = isset($this->pipes[0]) ? [$this->pipes[0]] : null;
+        
+        $w = isset($this->pipes[0]) ? [
+            $this->pipes[0]
+        ] : null;
         $e = null;
-
+        
         if (false === $n = @stream_select($r, $w, $e, 0, $blocking ? Process::TIMEOUT_PRECISION * 1E6 : 0)) {
-
-            if (!$this->hasSystemCallBeenInterrupted()) {
+            
+            if (! $this->hasSystemCallBeenInterrupted()) {
                 $this->pipes = [];
             }
-
+            
             return $read;
         }
-
+        
         if (0 === $n) {
             return $read;
         }
-
+        
         foreach ($r as $pipe) {
-
+            
             $type = (false !== $found = array_search($pipe, $this->pipes)) ? $found : 'input';
             $data = '';
             while ('' !== $dataread = (string) fread($pipe, self::CHUNK_SIZE)) {
                 $data .= $dataread;
             }
-
+            
             if ('' !== $data) {
                 if ('input' === $type) {
                     $this->inputBuffer .= $data;
@@ -145,7 +188,7 @@ class Unix extends Pipes
                     $read[$type] = $data;
                 }
             }
-
+            
             if (false === $data || (true === $close && feof($pipe) && '' === $data)) {
                 if ('input' === $type) {
                     $this->input = null;
@@ -155,7 +198,7 @@ class Unix extends Pipes
                 }
             }
         }
-
+        
         if (null !== $w && 0 < count($w)) {
             while (strlen($this->inputBuffer)) {
                 $written = fwrite($w[0], $this->inputBuffer, 2 << 18); // write 512k
@@ -166,17 +209,19 @@ class Unix extends Pipes
                 }
             }
         }
-
+        
         if ('' === $this->inputBuffer && null === $this->input && isset($this->pipes[0])) {
             fclose($this->pipes[0]);
             unset($this->pipes[0]);
         }
-
+        
         return $read;
     }
 
     /**
+     *
      * {@inheritdoc}
+     *
      */
     public function areOpen()
     {
@@ -185,8 +230,9 @@ class Unix extends Pipes
 
     /**
      * 创建一个新的 UnixPipes 实例
-     * @param Process         $process
-     * @param string|resource $input
+     * 
+     * @param Process $process            
+     * @param string|resource $input            
      * @return self
      */
     public static function create(Process $process, $input)

@@ -8,7 +8,6 @@
 // +----------------------------------------------------------------------
 // | Author: yunwuxin <448901948@qq.com>
 // +----------------------------------------------------------------------
-
 namespace think\process\exception;
 
 use think\Process;
@@ -17,16 +16,18 @@ class Timeout extends \RuntimeException
 {
 
     const TYPE_GENERAL = 1;
-    const TYPE_IDLE    = 2;
+
+    const TYPE_IDLE = 2;
 
     private $process;
+
     private $timeoutType;
 
     public function __construct(Process $process, $timeoutType)
     {
-        $this->process     = $process;
+        $this->process = $process;
         $this->timeoutType = $timeoutType;
-
+        
         parent::__construct(sprintf('The process "%s" exceeded the timeout of %s seconds.', $process->getCommandLine(), $this->getExceededTimeout()));
     }
 
@@ -50,10 +51,10 @@ class Timeout extends \RuntimeException
         switch ($this->timeoutType) {
             case self::TYPE_GENERAL:
                 return $this->process->getTimeout();
-
+            
             case self::TYPE_IDLE:
                 return $this->process->getIdleTimeout();
-
+            
             default:
                 throw new \LogicException(sprintf('Unknown timeout type "%d".', $this->timeoutType));
         }

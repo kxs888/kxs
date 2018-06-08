@@ -8,14 +8,15 @@
 // +----------------------------------------------------------------------
 // | Author: yunwuxin <448901948@qq.com>
 // +----------------------------------------------------------------------
-
 namespace think\console\output\driver;
 
 use think\console\Output;
 
 class Buffer
 {
+
     /**
+     *
      * @var string
      */
     private $buffer = '';
@@ -27,7 +28,7 @@ class Buffer
 
     public function fetch()
     {
-        $content      = $this->buffer;
+        $content = $this->buffer;
         $this->buffer = '';
         return $content;
     }
@@ -35,7 +36,7 @@ class Buffer
     public function write($messages, $newline = false, $options = Output::OUTPUT_NORMAL)
     {
         $messages = (array) $messages;
-
+        
         foreach ($messages as $message) {
             $this->buffer .= $message;
         }
@@ -48,5 +49,4 @@ class Buffer
     {
         // do nothing
     }
-
 }

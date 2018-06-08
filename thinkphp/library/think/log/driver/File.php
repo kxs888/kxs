@@ -8,7 +8,6 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
 namespace think\log\driver;
 
 use think\App;
@@ -18,15 +17,16 @@ use think\App;
  */
 class File
 {
+
     protected $config = [
         'time_format' => ' c ',
-        'file_size'   => 2097152,
-        'path'        => LOG_PATH,
-        'apart_level' => [],
+        'file_size' => 2097152,
+        'path' => LOG_PATH,
+        'apart_level' => []
     ];
 
     protected $writed = [];
-
+    
     // 实例化并传入参数
     public function __construct($config = [])
     {
@@ -37,23 +37,25 @@ class File
 
     /**
      * 日志写入接口
+     * 
      * @access public
-     * @param array $log 日志信息
+     * @param array $log
+     *            日志信息
      * @return bool
      */
     public function save(array $log = [])
     {
-        $cli         = IS_CLI ? '_cli' : '';
+        $cli = IS_CLI ? '_cli' : '';
         $destination = $this->config['path'] . date('Ym') . DS . date('d') . $cli . '.log';
-
+        
         $path = dirname($destination);
-        !is_dir($path) && mkdir($path, 0755, true);
-
+        ! is_dir($path) && mkdir($path, 0755, true);
+        
         $info = '';
         foreach ($log as $type => $val) {
             $level = '';
             foreach ($val as $msg) {
-                if (!is_string($msg)) {
+                if (! is_string($msg)) {
                     $msg = var_export($msg, true);
                 }
                 $level .= '[ ' . $type . ' ] ' . $msg . "\r\n";
@@ -74,46 +76,45 @@ class File
 
     protected function write($message, $destination, $apart = false)
     {
-        //检测日志文件大小，超过配置大小则备份日志文件重新生成
+        // 检测日志文件大小，超过配置大小则备份日志文件重新生成
         if (is_file($destination) && floor($this->config['file_size']) <= filesize($destination)) {
             rename($destination, dirname($destination) . DS . time() . '-' . basename($destination));
             $this->writed[$destination] = false;
         }
-
-        if (empty($this->writed[$destination]) && !IS_CLI) {
-            if (App::$debug && !$apart) {
+        
+        if (empty($this->writed[$destination]) && ! IS_CLI) {
+            if (App::$debug && ! $apart) {
                 // 获取基本信息
                 if (isset($_SERVER['HTTP_HOST'])) {
                     $current_uri = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
                 } else {
                     $current_uri = "cmd:" . implode(' ', $_SERVER['argv']);
                 }
-
-                $runtime    = round(microtime(true) - THINK_START_TIME, 10);
-                $reqs       = $runtime > 0 ? number_format(1 / $runtime, 2) : '∞';
-                $time_str   = ' [运行时间：' . number_format($runtime, 6) . 's][吞吐率：' . $reqs . 'req/s]';
+                
+                $runtime = round(microtime(true) - THINK_START_TIME, 10);
+                $reqs = $runtime > 0 ? number_format(1 / $runtime, 2) : '∞';
+                $time_str = ' [运行时间：' . number_format($runtime, 6) . 's][吞吐率：' . $reqs . 'req/s]';
                 $memory_use = number_format((memory_get_usage() - THINK_START_MEM) / 1024, 2);
                 $memory_str = ' [内存消耗：' . $memory_use . 'kb]';
-                $file_load  = ' [文件加载：' . count(get_included_files()) . ']';
-
+                $file_load = ' [文件加载：' . count(get_included_files()) . ']';
+                
                 $message = '[ info ] ' . $current_uri . $time_str . $memory_str . $file_load . "\r\n" . $message;
             }
-            $now     = date($this->config['time_format']);
-            $server  = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : '0.0.0.0';
-            $remote  = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
-            $method  = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'CLI';
-            $uri     = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+            $now = date($this->config['time_format']);
+            $server = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : '0.0.0.0';
+            $remote = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
+            $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'CLI';
+            $uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
             $message = "---------------------------------------------------------------\r\n[{$now}] {$server} {$remote} {$method} {$uri}\r\n" . $message;
-
+            
             $this->writed[$destination] = true;
         }
-
+        
         if (IS_CLI) {
-            $now     = date($this->config['time_format']);
+            $now = date($this->config['time_format']);
             $message = "[{$now}]" . $message;
         }
-
+        
         return error_log($message, 3, $destination);
     }
-
 }

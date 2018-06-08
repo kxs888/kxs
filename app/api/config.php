@@ -1,8 +1,8 @@
 <?php
-    return       [
-       'appid'  => '',
-       'redirect_uri' => '',
-       'secret' => '',
-    ];
+return [
+    'appid' => '',
+    'redirect_uri' => '',
+    'secret' => ''
+];
         
    

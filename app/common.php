@@ -11,10 +11,10 @@
 
 // 应用公共文件
 
-
 /**
  * 调试输出
- * @param unknown $data
+ * 
+ * @param unknown $data            
  */
 function print_data($data, $var_dump = false)
 {
@@ -30,7 +30,8 @@ function print_data($data, $var_dump = false)
 
 /**
  * 输出json格式数据
- * @param unknown $object
+ * 
+ * @param unknown $object            
  */
 function print_json($object)
 {
@@ -41,28 +42,32 @@ function print_json($object)
 
 /**
  * 账户密码加密
- * @param  string $str password
- * @return string(32)       
+ * 
+ * @param string $str
+ *            password
+ * @return string(32)
  */
 function md6($str)
 {
-	$key = 'account_nobody';
-	return md5(md5($str).$key);
+    $key = 'account_nobody';
+    return md5(md5($str) . $key);
 }
 
 /**
  * 替换字符串中间位置字符为星号
- * @param  [type] $str [description]
+ * 
+ * @param [type] $str
+ *            [description]
  * @return [type] [description]
  */
 function replaceToStar($str)
 {
-    $len = strlen($str) / 2; //a0dca4d0****************ba444758]
+    $len = strlen($str) / 2; // a0dca4d0****************ba444758]
     return substr_replace($str, str_repeat('*', $len), floor(($len) / 2), $len);
 }
 
-function mduser( $str )
+function mduser($str)
 {
     $user_auth_key = \think\Config::get('user_auth_key');
-    return md5(md5($user_auth_key).$str);
+    return md5(md5($user_auth_key) . $str);
 }

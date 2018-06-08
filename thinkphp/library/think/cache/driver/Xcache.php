@@ -8,42 +8,47 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
 namespace think\cache\driver;
 
 use think\cache\Driver;
 
 /**
  * Xcache缓存驱动
- * @author    liu21st <liu21st@gmail.com>
+ * 
+ * @author liu21st <liu21st@gmail.com>
  */
 class Xcache extends Driver
 {
+
     protected $options = [
         'prefix' => '',
-        'expire' => 0,
+        'expire' => 0
     ];
 
     /**
      * 构造函数
-     * @param array $options 缓存参数
+     * 
+     * @param array $options
+     *            缓存参数
      * @access public
      * @throws \BadFunctionCallException
      */
     public function __construct($options = [])
     {
-        if (!function_exists('xcache_info')) {
+        if (! function_exists('xcache_info')) {
             throw new \BadFunctionCallException('not support: Xcache');
         }
-        if (!empty($options)) {
+        if (! empty($options)) {
             $this->options = array_merge($this->options, $options);
         }
     }
 
     /**
      * 判断缓存
+     * 
      * @access public
-     * @param string $name 缓存变量名
+     * @param string $name
+     *            缓存变量名
      * @return bool
      */
     public function has($name)
@@ -54,9 +59,12 @@ class Xcache extends Driver
 
     /**
      * 读取缓存
+     * 
      * @access public
-     * @param string $name 缓存变量名
-     * @param mixed  $default 默认值
+     * @param string $name
+     *            缓存变量名
+     * @param mixed $default
+     *            默认值
      * @return mixed
      */
     public function get($name, $default = false)
@@ -67,10 +75,14 @@ class Xcache extends Driver
 
     /**
      * 写入缓存
+     * 
      * @access public
-     * @param string    $name 缓存变量名
-     * @param mixed     $value  存储数据
-     * @param integer   $expire  有效时间（秒）
+     * @param string $name
+     *            缓存变量名
+     * @param mixed $value
+     *            存储数据
+     * @param integer $expire
+     *            有效时间（秒）
      * @return boolean
      */
     public function set($name, $value, $expire = null)
@@ -78,7 +90,7 @@ class Xcache extends Driver
         if (is_null($expire)) {
             $expire = $this->options['expire'];
         }
-        if ($this->tag && !$this->has($name)) {
+        if ($this->tag && ! $this->has($name)) {
             $first = true;
         }
         $key = $this->getCacheKey($name);
@@ -91,9 +103,12 @@ class Xcache extends Driver
 
     /**
      * 自增缓存（针对数值缓存）
+     * 
      * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
+     * @param string $name
+     *            缓存变量名
+     * @param int $step
+     *            步长
      * @return false|int
      */
     public function inc($name, $step = 1)
@@ -104,9 +119,12 @@ class Xcache extends Driver
 
     /**
      * 自减缓存（针对数值缓存）
+     * 
      * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
+     * @param string $name
+     *            缓存变量名
+     * @param int $step
+     *            步长
      * @return false|int
      */
     public function dec($name, $step = 1)
@@ -117,8 +135,10 @@ class Xcache extends Driver
 
     /**
      * 删除缓存
+     * 
      * @access public
-     * @param string $name 缓存变量名
+     * @param string $name
+     *            缓存变量名
      * @return boolean
      */
     public function rm($name)
@@ -128,8 +148,10 @@ class Xcache extends Driver
 
     /**
      * 清除缓存
+     * 
      * @access public
-     * @param string $tag 标签名
+     * @param string $tag
+     *            标签名
      * @return boolean
      */
     public function clear($tag = null)

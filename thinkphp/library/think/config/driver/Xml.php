@@ -8,11 +8,11 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
 namespace think\config\driver;
 
 class Xml
 {
+
     public function parse($config)
     {
         if (is_file($config)) {

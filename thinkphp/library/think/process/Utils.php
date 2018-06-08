@@ -6,7 +6,6 @@
 // +----------------------------------------------------------------------
 // | Author: zhangyajun <448901948@qq.com>
 // +----------------------------------------------------------------------
-
 namespace think\process;
 
 class Utils
@@ -14,26 +13,26 @@ class Utils
 
     /**
      * 转义字符串
-     * @param string $argument
+     * 
+     * @param string $argument            
      * @return string
      */
     public static function escapeArgument($argument)
     {
-
         if ('' === $argument) {
             return escapeshellarg($argument);
         }
         $escapedArgument = '';
-        $quote           = false;
-        foreach (preg_split('/(")/i', $argument, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE) as $part) {
+        $quote = false;
+        foreach (preg_split('/(")/i', $argument, - 1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE) as $part) {
             if ('"' === $part) {
                 $escapedArgument .= '\\"';
             } elseif (self::isSurroundedBy($part, '%')) {
                 // Avoid environment variable expansion
-                $escapedArgument .= '^%"' . substr($part, 1, -1) . '"^%';
+                $escapedArgument .= '^%"' . substr($part, 1, - 1) . '"^%';
             } else {
                 // escape trailing backslash
-                if ('\\' === substr($part, -1)) {
+                if ('\\' === substr($part, - 1)) {
                     $part .= '\\';
                 }
                 $quote = true;
@@ -48,8 +47,9 @@ class Utils
 
     /**
      * 验证并进行规范化Process输入。
-     * @param string $caller
-     * @param mixed  $input
+     * 
+     * @param string $caller            
+     * @param mixed $input            
      * @return string
      * @throws \InvalidArgumentException
      */
@@ -71,5 +71,4 @@ class Utils
     {
         return 2 < strlen($arg) && $char === $arg[0] && $char === $arg[strlen($arg) - 1];
     }
-
 }

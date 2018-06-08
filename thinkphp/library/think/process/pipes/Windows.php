@@ -8,7 +8,6 @@
 // +----------------------------------------------------------------------
 // | Author: yunwuxin <448901948@qq.com>
 // +----------------------------------------------------------------------
-
 namespace think\process\pipes;
 
 use think\Process;
@@ -18,25 +17,28 @@ class Windows extends Pipes
 
     /** @var array */
     private $files = [];
+
     /** @var array */
     private $fileHandles = [];
+
     /** @var array */
     private $readBytes = [
         Process::STDOUT => 0,
-        Process::STDERR => 0,
+        Process::STDERR => 0
     ];
+
     /** @var bool */
     private $disableOutput;
 
     public function __construct($disableOutput, $input)
     {
         $this->disableOutput = (bool) $disableOutput;
-
-        if (!$this->disableOutput) {
-
+        
+        if (! $this->disableOutput) {
+            
             $this->files = [
                 Process::STDOUT => tempnam(sys_get_temp_dir(), 'sf_proc_stdout'),
-                Process::STDERR => tempnam(sys_get_temp_dir(), 'sf_proc_stderr'),
+                Process::STDERR => tempnam(sys_get_temp_dir(), 'sf_proc_stderr')
             ];
             foreach ($this->files as $offset => $file) {
                 $this->fileHandles[$offset] = fopen($this->files[$offset], 'rb');
@@ -45,7 +47,7 @@ class Windows extends Pipes
                 }
             }
         }
-
+        
         if (is_resource($input)) {
             $this->input = $input;
         } else {
@@ -60,29 +62,47 @@ class Windows extends Pipes
     }
 
     /**
+     *
      * {@inheritdoc}
+     *
      */
     public function getDescriptors()
     {
         if ($this->disableOutput) {
             $nullstream = fopen('NUL', 'c');
-
+            
             return [
-                ['pipe', 'r'],
+                [
+                    'pipe',
+                    'r'
+                ],
                 $nullstream,
-                $nullstream,
+                $nullstream
             ];
         }
-
+        
         return [
-            ['pipe', 'r'],
-            ['file', 'NUL', 'w'],
-            ['file', 'NUL', 'w'],
+            [
+                'pipe',
+                'r'
+            ],
+            [
+                'file',
+                'NUL',
+                'w'
+            ],
+            [
+                'file',
+                'NUL',
+                'w'
+            ]
         ];
     }
 
     /**
+     *
      * {@inheritdoc}
+     *
      */
     public function getFiles()
     {
@@ -90,21 +110,23 @@ class Windows extends Pipes
     }
 
     /**
+     *
      * {@inheritdoc}
+     *
      */
     public function readAndWrite($blocking, $close = false)
     {
         $this->write($blocking, $close);
-
+        
         $read = [];
-        $fh   = $this->fileHandles;
+        $fh = $this->fileHandles;
         foreach ($fh as $type => $fileHandle) {
             if (0 !== fseek($fileHandle, $this->readBytes[$type])) {
                 continue;
             }
-            $data     = '';
+            $data = '';
             $dataread = null;
-            while (!feof($fileHandle)) {
+            while (! feof($fileHandle)) {
                 if (false !== $dataread = fread($fileHandle, self::CHUNK_SIZE)) {
                     $data .= $dataread;
                 }
@@ -113,18 +135,20 @@ class Windows extends Pipes
                 $this->readBytes[$type] += $length;
                 $read[$type] = $data;
             }
-
+            
             if (false === $dataread || (true === $close && feof($fileHandle) && '' === $data)) {
                 fclose($this->fileHandles[$type]);
                 unset($this->fileHandles[$type]);
             }
         }
-
+        
         return $read;
     }
 
     /**
+     *
      * {@inheritdoc}
+     *
      */
     public function areOpen()
     {
@@ -132,7 +156,9 @@ class Windows extends Pipes
     }
 
     /**
+     *
      * {@inheritdoc}
+     *
      */
     public function close()
     {
@@ -145,8 +171,10 @@ class Windows extends Pipes
 
     /**
      * 创建一个新的 WindowsPipes 实例。
-     * @param Process $process
-     * @param         $input
+     * 
+     * @param Process $process            
+     * @param
+     *            $input
      * @return self
      */
     public static function create(Process $process, $input)
@@ -169,46 +197,51 @@ class Windows extends Pipes
 
     /**
      * 写入到 stdin 输入
-     * @param bool $blocking
-     * @param bool $close
+     * 
+     * @param bool $blocking            
+     * @param bool $close            
      */
     private function write($blocking, $close)
     {
         if (empty($this->pipes)) {
             return;
         }
-
+        
         $this->unblock();
-
-        $r = null !== $this->input ? ['input' => $this->input] : null;
-        $w = isset($this->pipes[0]) ? [$this->pipes[0]] : null;
+        
+        $r = null !== $this->input ? [
+            'input' => $this->input
+        ] : null;
+        $w = isset($this->pipes[0]) ? [
+            $this->pipes[0]
+        ] : null;
         $e = null;
-
+        
         if (false === $n = @stream_select($r, $w, $e, 0, $blocking ? Process::TIMEOUT_PRECISION * 1E6 : 0)) {
-            if (!$this->hasSystemCallBeenInterrupted()) {
+            if (! $this->hasSystemCallBeenInterrupted()) {
                 $this->pipes = [];
             }
-
+            
             return;
         }
-
+        
         if (0 === $n) {
             return;
         }
-
+        
         if (null !== $w && 0 < count($r)) {
             $data = '';
             while ($dataread = fread($r['input'], self::CHUNK_SIZE)) {
                 $data .= $dataread;
             }
-
+            
             $this->inputBuffer .= $data;
-
+            
             if (false === $data || (true === $close && feof($r['input']) && '' === $data)) {
                 $this->input = null;
             }
         }
-
+        
         if (null !== $w && 0 < count($w)) {
             while (strlen($this->inputBuffer)) {
                 $written = fwrite($w[0], $this->inputBuffer, 2 << 18);
@@ -219,7 +252,7 @@ class Windows extends Pipes
                 }
             }
         }
-
+        
         if ('' === $this->inputBuffer && null === $this->input && isset($this->pipes[0])) {
             fclose($this->pipes[0]);
             unset($this->pipes[0]);

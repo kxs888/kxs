@@ -3,6 +3,7 @@ namespace app\api\controller;
 use app\common\controller\Common;
 use think\Db;
 use app\api\model\User;
+use app\api\Validate\Validate;
 
 class Index extends Common
 {
@@ -23,7 +24,7 @@ class Index extends Common
             $array['code'] = 0;
             $array['msg']  = '登陆成功';
         }
-             return json_encode($array,JSON_UNESCAPED_UNICODE);
+        return json_encode($array,JSON_UNESCAPED_UNICODE);
         
        
     }  
@@ -35,14 +36,24 @@ class Index extends Common
         $user1->phone = input('phone');
         $user1->passwd = md5(input('passwd'));
         $user1->create_time = input('create_time');
-        $res = $user1->save();
-        if(!$res){
+        if (!Validate::isPhone($user1->phone)) {
             $array['code'] = -1;
-            $array['msg'] = '保存失败';
-        } else  {
-            $array['code'] = 0;
-            $array['msg'] = '保存成功';
+            $array['msg'] = '手机号不正确';
+        } elseif (!Validate::isUserName($user1->pusername)){
+            $array['code'] = -1;
+            $array['msg'] = '用户名格式不正确';
+        } else {
+
+            $res = $user1->save();
+            if(!$res){
+                $array['code'] = -1;
+                $array['msg'] = '保存失败';
+            } else  {
+                $array['code'] = 0;
+                $array['msg'] = '保存成功';
+            } 
         }
+       
         return json_encode($array);
     }   
 }

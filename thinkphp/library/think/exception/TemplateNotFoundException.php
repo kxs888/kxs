@@ -8,21 +8,22 @@
 // +----------------------------------------------------------------------
 // | Author: yunwuxin <448901948@qq.com>
 // +----------------------------------------------------------------------
-
 namespace think\exception;
 
 class TemplateNotFoundException extends \RuntimeException
 {
+
     protected $template;
 
     public function __construct($message, $template = '')
     {
-        $this->message  = $message;
+        $this->message = $message;
         $this->template = $template;
     }
 
     /**
      * 获取模板文件
+     * 
      * @access public
      * @return string
      */

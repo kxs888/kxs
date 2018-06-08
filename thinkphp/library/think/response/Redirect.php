@@ -8,7 +8,6 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
 namespace think\response;
 
 use think\Request;
@@ -20,7 +19,7 @@ class Redirect extends Response
 {
 
     protected $options = [];
-
+    
     // URL参数
     protected $params = [];
 
@@ -32,8 +31,10 @@ class Redirect extends Response
 
     /**
      * 处理数据
+     * 
      * @access protected
-     * @param mixed $data 要处理的数据
+     * @param mixed $data
+     *            要处理的数据
      * @return mixed
      */
     protected function output($data)
@@ -44,9 +45,12 @@ class Redirect extends Response
 
     /**
      * 重定向传值（通过Session）
+     * 
      * @access protected
-     * @param string|array  $name 变量名或者数组
-     * @param mixed         $value 值
+     * @param string|array $name
+     *            变量名或者数组
+     * @param mixed $value
+     *            值
      * @return $this
      */
     public function with($name, $value = null)
@@ -63,6 +67,7 @@ class Redirect extends Response
 
     /**
      * 获取跳转地址
+     * 
      * @return string
      */
     public function getTargetUrl()
@@ -78,6 +83,7 @@ class Redirect extends Response
 
     /**
      * 记住当前url后跳转
+     * 
      * @return $this
      */
     public function remember()
@@ -88,6 +94,7 @@ class Redirect extends Response
 
     /**
      * 跳转到上次记住的url
+     * 
      * @return $this
      */
     public function restore()

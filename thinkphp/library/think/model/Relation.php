@@ -8,7 +8,6 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
 namespace think\model;
 
 use think\db\Query;
@@ -17,16 +16,19 @@ use think\Model;
 
 /**
  * Class Relation
+ * 
  * @package think\model
- *
- * @mixin Query
+ *         
+ *          @mixin Query
  */
 abstract class Relation
 {
     // 父模型对象
     protected $parent;
+
     /** @var  Model 当前关联的模型类 */
     protected $model;
+
     /** @var Query 关联模型查询对象 */
     protected $query;
     // 关联表外键
@@ -38,6 +40,7 @@ abstract class Relation
 
     /**
      * 获取关联的所属模型
+     * 
      * @access public
      * @return Model
      */
@@ -48,6 +51,7 @@ abstract class Relation
 
     /**
      * 获取当前的关联模型类
+     * 
      * @access public
      * @return string
      */
@@ -58,6 +62,7 @@ abstract class Relation
 
     /**
      * 获取关联的查询对象
+     * 
      * @access public
      * @return Query
      */
@@ -68,13 +73,15 @@ abstract class Relation
 
     /**
      * 封装关联数据集
+     * 
      * @access public
-     * @param array $resultSet 数据集
+     * @param array $resultSet
+     *            数据集
      * @return mixed
      */
     protected function resultSetBuild($resultSet)
     {
-        return (new $this->model)->toCollection($resultSet);
+        return (new $this->model())->toCollection($resultSet);
     }
 
     protected function getQueryFields($model)
@@ -86,11 +93,11 @@ abstract class Relation
     protected function getRelationQueryFields($fields, $model)
     {
         if ($fields) {
-
+            
             if (is_string($fields)) {
                 $fields = explode(',', $fields);
             }
-
+            
             foreach ($fields as &$field) {
                 if (false === strpos($field, '.')) {
                     $field = $model . '.' . $field;
@@ -99,12 +106,13 @@ abstract class Relation
         } else {
             $fields = $model . '.*';
         }
-
+        
         return $fields;
     }
 
     /**
      * 执行基础查询（仅执行一次）
+     * 
      * @access protected
      * @return void
      */
@@ -115,8 +123,11 @@ abstract class Relation
         if ($this->query) {
             // 执行基础查询
             $this->baseQuery();
-
-            $result = call_user_func_array([$this->query, $method], $args);
+            
+            $result = call_user_func_array([
+                $this->query,
+                $method
+            ], $args);
             if ($result instanceof Query) {
                 return $this;
             } else {

@@ -8,7 +8,6 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
 namespace think\db\builder;
 
 use think\db\Builder;
@@ -21,13 +20,14 @@ class Sqlite extends Builder
 
     /**
      * limit
+     * 
      * @access public
      * @return string
      */
     public function parseLimit($limit)
     {
         $limitStr = '';
-        if (!empty($limit)) {
+        if (! empty($limit)) {
             $limit = explode(',', $limit);
             if (count($limit) > 1) {
                 $limitStr .= ' LIMIT ' . $limit[1] . ' OFFSET ' . $limit[0] . ' ';
@@ -40,6 +40,7 @@ class Sqlite extends Builder
 
     /**
      * 随机排序
+     * 
      * @access protected
      * @return string
      */
@@ -50,16 +51,17 @@ class Sqlite extends Builder
 
     /**
      * 字段和表名处理
+     * 
      * @access protected
-     * @param string $key
-     * @param array  $options
+     * @param string $key            
+     * @param array $options            
      * @return string
      */
     protected function parseKey($key, $options = [])
     {
         $key = trim($key);
         if (strpos($key, '.')) {
-            list($table, $key) = explode('.', $key, 2);
+            list ($table, $key) = explode('.', $key, 2);
             if ('__TABLE__' == $table) {
                 $table = $this->query->getTable();
             }

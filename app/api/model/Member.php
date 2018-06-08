@@ -10,6 +10,4 @@ use app\common\model\Common;
 
 class Member extends Common
 {
-	
-
 }

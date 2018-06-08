@@ -10,20 +10,23 @@ use think\Session;
 use think\Config;
 
 /**
-* 登录
-* @author aierui github  https://github.com/Aierui
-* @version 1.0 
-*/
+ * 登录
+ * 
+ * @author aierui github https://github.com/Aierui
+ * @version 1.0
+ *         
+ */
 class Index extends Admin
 {
-	/**
-	 * 后台登录首页
-	 */
-	public function index()
-	{
-		$data['ip'] = Loader::model('LogRecord')->UniqueIpCount();
 
-		$this->assign('data', $data);
-		return view();
-	}
+    /**
+     * 后台登录首页
+     */
+    public function index()
+    {
+        $data['ip'] = Loader::model('LogRecord')->UniqueIpCount();
+        
+        $this->assign('data', $data);
+        return view();
+    }
 }

@@ -8,7 +8,6 @@
 // +----------------------------------------------------------------------
 // | Author: yunwuxin <448901948@qq.com>
 // +----------------------------------------------------------------------
-
 namespace think\process\exception;
 
 use think\Process;
@@ -23,15 +22,15 @@ class Failed extends \RuntimeException
         if ($process->isSuccessful()) {
             throw new \InvalidArgumentException('Expected a failed process, but the given process was successful.');
         }
-
+        
         $error = sprintf('The command "%s" failed.' . "\nExit Code: %s(%s)", $process->getCommandLine(), $process->getExitCode(), $process->getExitCodeText());
-
-        if (!$process->isOutputDisabled()) {
+        
+        if (! $process->isOutputDisabled()) {
             $error .= sprintf("\n\nOutput:\n================\n%s\n\nError Output:\n================\n%s", $process->getOutput(), $process->getErrorOutput());
         }
-
+        
         parent::__construct($error);
-
+        
         $this->process = $process;
     }
 

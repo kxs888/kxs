@@ -8,20 +8,30 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
 use think\Route;
 
-
-Route::rule('test/:id','admin/Test/read');
-
+Route::rule('test/:id', 'admin/Test/read');
 
 return [
     '__pattern__' => [
-        'name' => '\w+',
+        'name' => '\w+'
     ],
-    '[hello]'     => [
-        ':id'   => ['index/hello', ['method' => 'get'], ['id' => '\d+']],
-        ':name' => ['index/hello', ['method' => 'post']],
-    ],
-
-];
+    '[hello]' => [
+        ':id' => [
+            'index/hello',
+            [
+                'method' => 'get'
+            ],
+            [
+                'id' => '\d+'
+            ]
+        ],
+        ':name' => [
+            'index/hello',
+            [
+                'method' => 'post'
+            ]
+        ]
+    ]
+]
+;

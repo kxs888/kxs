@@ -8,38 +8,41 @@ use think\Model;
 
 class Role extends Admin
 {
-    //根据uid返回角色 rule_val
-    public function getRoleInfo( $uid )
-    {
-
-    }
+    // 根据uid返回角色 rule_val
+    public function getRoleInfo($uid)
+    {}
 
     public function getKvData()
     {
-        return $this->where('status',1)->column('name','id');
+        return $this->where('status', 1)->column('name', 'id');
     }
 
-    public function getList( $request )
+    public function getList($request)
     {
-        $request = $this->fmtRequest( $request );
-        return $this->order('create_time desc')->where( $request['map'] )->limit($request['offset'], $request['limit'])->select();
+        $request = $this->fmtRequest($request);
+        return $this->order('create_time desc')
+            ->where($request['map'])
+            ->limit($request['offset'], $request['limit'])
+            ->select();
     }
 
-    public function saveData( $data )
+    public function saveData($data)
     {
-        if( isset( $data['id']) && !empty($data['id'])) {
-            $info = $this->edit( $data );
+        if (isset($data['id']) && ! empty($data['id'])) {
+            $info = $this->edit($data);
         } else {
-            $info = $this->add( $data );
+            $info = $this->add($data);
         }
-
+        
         return $info;
     }
 
-    public function edit( $data )
+    public function edit($data)
     {
-        $result = $this->where(['id'=>$data['id']])->update( $data );
-        if( false === $result) {
+        $result = $this->where([
+            'id' => $data['id']
+        ])->update($data);
+        if (false === $result) {
             $info = info(lang('Edit failed'), 0);
         } else {
             $info = info(lang('Edit succeed'), 1);
@@ -47,15 +50,15 @@ class Role extends Admin
         return $info;
     }
 
-    public function add( $data )
+    public function add($data)
     {
-        $id = $this->insertGetId( $data );
-        if( false === $id) {
+        $id = $this->insertGetId($data);
+        if (false === $id) {
             $info = info(lang('Add failed'), 0);
         } else {
             $info = info(lang('Add succeed'), 1, '', $id);
         }
-
+        
         return $info;
     }
 

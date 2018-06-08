@@ -1,50 +1,58 @@
 <?php
 namespace app\admin\commom\tools\Weichat;
-class JSSDK {
+
+class Weichat
+{
+
     private $appId;
+
     private $appSecret;
 
-    public function __construct($appId, $appSecret) {
+    public function __construct($appId, $appSecret)
+    {
         $this->appId = $appId;
         $this->appSecret = $appSecret;
     }
 
-    public function getSignPackage() {
+    public function getSignPackage()
+    {
         $jsapiTicket = $this->getJsApiTicket();
-
+        
         // 注意 URL 一定要动态获取，不能 hardcode.
-        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+        $protocol = (! empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
         $url = "$protocol$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-
+        
         $timestamp = time();
         $nonceStr = $this->createNonceStr();
-
+        
         // 这里参数的顺序要按照 key 值 ASCII 码升序排序
         $string = "jsapi_ticket=$jsapiTicket&noncestr=$nonceStr&timestamp=$timestamp&url=$url";
-
+        
         $signature = sha1($string);
-
+        
         $signPackage = array(
-            "appId"     => $this->appId,
-            "nonceStr"  => $nonceStr,
+            "appId" => $this->appId,
+            "nonceStr" => $nonceStr,
             "timestamp" => $timestamp,
-            "url"       => $url,
+            "url" => $url,
             "signature" => $signature,
             "rawString" => $string
         );
         return $signPackage;
     }
 
-    private function createNonceStr($length = 16) {
+    private function createNonceStr($length = 16)
+    {
         $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         $str = "";
-        for ($i = 0; $i < $length; $i++) {
+        for ($i = 0; $i < $length; $i ++) {
             $str .= substr($chars, mt_rand(0, strlen($chars) - 1), 1);
         }
         return $str;
     }
 
-    private function getJsApiTicket() {
+    private function getJsApiTicket()
+    {
         // jsapi_ticket 应该全局存储与更新，以下代码以写入到文件中做示例
         $data = json_decode($this->get_php_file("jsapi_ticket.php"));
         if ($data->expire_time < time()) {
@@ -62,11 +70,12 @@ class JSSDK {
         } else {
             $ticket = $data->jsapi_ticket;
         }
-
+        
         return $ticket;
     }
 
-    private function getAccessToken() {
+    private function getAccessToken()
+    {
         // access_token 应该全局存储与更新，以下代码以写入到文件中做示例
         $data = json_decode($this->get_php_file("access_token.php"));
         if ($data->expire_time < time()) {
@@ -86,7 +95,8 @@ class JSSDK {
         return $access_token;
     }
 
-    private function httpGet($url) {
+    private function httpGet($url)
+    {
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_TIMEOUT, 500);
@@ -95,30 +105,34 @@ class JSSDK {
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, true);
         curl_setopt($curl, CURLOPT_URL, $url);
-
+        
         $res = curl_exec($curl);
         curl_close($curl);
-
+        
         return $res;
     }
 
-    private function get_php_file($filename) {
+    private function get_php_file($filename)
+    {
         return trim(substr(file_get_contents($filename), 15));
     }
-    private function set_php_file($filename, $content) {
+
+    private function set_php_file($filename, $content)
+    {
         $fp = fopen($filename, "w");
         fwrite($fp, "<?php exit();?>" . $content);
         fclose($fp);
     }
-    
+
     /**
      * 微信授权获取code
-     * @param unknown $url
-     * @param string $is_get_userinfo
+     * 
+     * @param unknown $url            
+     * @param string $is_get_userinfo            
      * @return string
      */
-    public function getCode($url, $is_get_userinfo = true) {
-        
+    public function getCode($url, $is_get_userinfo = true)
+    {
         if ($is_get_userinfo) {
             $scope = "snsapi_userinfo";
         } else {
@@ -127,15 +141,16 @@ class JSSDK {
         $urla = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=$this->appId&redirect_uri=$url&response_type=code&scope=$scope&state=STATE#wechat_redirect";
         return $urla;
     }
-    
+
     /**
-     * 
-     * @param unknown $access_token
-     * @param unknown $openid
+     *
+     * @param unknown $access_token            
+     * @param unknown $openid            
      * @return unknown
      */
-    public function getUserInfo($code){
-        
+    // 通过code获取用户信息
+    public function getUserInfo($code)
+    {
         $ao = $this->getAuthAccessToken($code);
         $access_token = $ao->access_token;
         $openid = $ao->openid;
@@ -143,8 +158,9 @@ class JSSDK {
         $res = json_decode($this->httpGet($url));
         return $res;
     }
-    //获取授权access_token
-    public function getAuthAccessToken($code) {
+    // 获取授权access_token
+    public function getAuthAccessToken($code)
+    {
         $url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=$this->appId&secret=$appSecret&code=$code&grant_type=authorization_code";
         $res = json_decode($this->httpGet($url));
         return $res;

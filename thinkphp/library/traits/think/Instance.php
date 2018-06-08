@@ -8,17 +8,18 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
 namespace traits\think;
 
 use think\Exception;
 
 trait Instance
 {
+
     protected static $instance = null;
 
     /**
-     * @param array $options
+     *
+     * @param array $options            
      * @return static
      */
     public static function instance($options = [])
@@ -28,7 +29,7 @@ trait Instance
         }
         return self::$instance;
     }
-
+    
     // 静态调用
     public static function __callStatic($method, $params)
     {
@@ -36,8 +37,14 @@ trait Instance
             self::$instance = new self();
         }
         $call = substr($method, 1);
-        if (0 === strpos($method, '_') && is_callable([self::$instance, $call])) {
-            return call_user_func_array([self::$instance, $call], $params);
+        if (0 === strpos($method, '_') && is_callable([
+            self::$instance,
+            $call
+        ])) {
+            return call_user_func_array([
+                self::$instance,
+                $call
+            ], $params);
         } else {
             throw new Exception("method not exists:" . $method);
         }

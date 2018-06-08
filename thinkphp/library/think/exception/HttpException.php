@@ -8,19 +8,20 @@
 // +----------------------------------------------------------------------
 // | Author: yunwuxin <448901948@qq.com>
 // +----------------------------------------------------------------------
-
 namespace think\exception;
 
 class HttpException extends \RuntimeException
 {
+
     private $statusCode;
+
     private $headers;
 
     public function __construct($statusCode, $message = null, \Exception $previous = null, array $headers = [], $code = 0)
     {
         $this->statusCode = $statusCode;
-        $this->headers    = $headers;
-
+        $this->headers = $headers;
+        
         parent::__construct($message, $code, $previous);
     }
 

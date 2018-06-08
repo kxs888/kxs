@@ -8,30 +8,34 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
 namespace think\template;
 
 use think\Exception;
 
 /**
  * ThinkPHP标签库TagLib解析基类
- * @category   Think
- * @package  Think
- * @subpackage  Template
- * @author    liu21st <liu21st@gmail.com>
+ * 
+ * @category Think
+ * @package Think
+ * @subpackage Template
+ * @author liu21st <liu21st@gmail.com>
  */
 class TagLib
 {
 
     /**
      * 标签库定义XML文件
+     * 
      * @var string
      * @access protected
      */
-    protected $xml  = '';
-    protected $tags = []; // 标签定义
+    protected $xml = '';
+
+    protected $tags = [];
+ // 标签定义
     /**
      * 标签库名称
+     * 
      * @var string
      * @access protected
      */
@@ -39,6 +43,7 @@ class TagLib
 
     /**
      * 标签库标签列表
+     * 
      * @var array
      * @access protected
      */
@@ -46,6 +51,7 @@ class TagLib
 
     /**
      * 标签库分析数组
+     * 
      * @var array
      * @access protected
      */
@@ -53,6 +59,7 @@ class TagLib
 
     /**
      * 标签库是否有效
+     * 
      * @var bool
      * @access protected
      */
@@ -60,17 +67,29 @@ class TagLib
 
     /**
      * 当前模板对象
+     * 
      * @var object
      * @access protected
      */
     protected $tpl;
 
-    protected $comparison = [' nheq ' => ' !== ', ' heq ' => ' === ', ' neq ' => ' != ', ' eq ' => ' == ', ' egt ' => ' >= ', ' gt ' => ' > ', ' elt ' => ' <= ', ' lt ' => ' < '];
+    protected $comparison = [
+        ' nheq ' => ' !== ',
+        ' heq ' => ' === ',
+        ' neq ' => ' != ',
+        ' eq ' => ' == ',
+        ' egt ' => ' >= ',
+        ' gt ' => ' > ',
+        ' elt ' => ' <= ',
+        ' lt ' => ' < '
+    ];
 
     /**
      * 构造函数
+     * 
      * @access public
-     * @param \stdClass $template 模板引擎对象
+     * @param \stdClass $template
+     *            模板引擎对象
      */
     public function __construct($template)
     {
@@ -79,17 +98,20 @@ class TagLib
 
     /**
      * 按签标库替换页面中的标签
+     * 
      * @access public
-     * @param  string $content 模板内容
-     * @param  string $lib 标签库名
+     * @param string $content
+     *            模板内容
+     * @param string $lib
+     *            标签库名
      * @return void
      */
     public function parseTag(&$content, $lib = '')
     {
         $tags = [];
-        $lib  = $lib ? strtolower($lib) . ':' : '';
+        $lib = $lib ? strtolower($lib) . ':' : '';
         foreach ($this->tags as $name => $val) {
-            $close                      = !isset($val['close']) || $val['close'] ? 1 : 0;
+            $close = ! isset($val['close']) || $val['close'] ? 1 : 0;
             $tags[$close][$lib . $name] = $name;
             if (isset($val['alias'])) {
                 // 别名设置
@@ -99,9 +121,9 @@ class TagLib
                 }
             }
         }
-
+        
         // 闭合标签
-        if (!empty($tags[1])) {
+        if (! empty($tags[1])) {
             $nodes = [];
             $regex = $this->getRegex(array_keys($tags[1]), 1);
             if (preg_match_all($regex, $content, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
@@ -110,13 +132,14 @@ class TagLib
                     if ('' == $match[1][0]) {
                         $name = strtolower($match[2][0]);
                         // 如果有没闭合的标签头则取出最后一个
-                        if (!empty($right[$name])) {
+                        if (! empty($right[$name])) {
                             // $match[0][1]为标签结束符在模板中的位置
                             $nodes[$match[0][1]] = [
-                                'name'  => $name,
+                                'name' => $name,
                                 'begin' => array_pop($right[$name]), // 标签开始符
-                                'end'   => $match[0], // 标签结束符
-                            ];
+                                'end' => $match[0]
+                            ] // 标签结束符
+;
                         }
                     } else {
                         // 标签头压入栈
@@ -127,17 +150,17 @@ class TagLib
                 // 按标签在模板中的位置从后向前排序
                 krsort($nodes);
             }
-
+            
             $break = '<!--###break###--!>';
             if ($nodes) {
                 $beginArray = [];
                 // 标签替换 从后向前
                 foreach ($nodes as $pos => $node) {
                     // 对应的标签名
-                    $name  = $tags[1][$node['name']];
+                    $name = $tags[1][$node['name']];
                     $alias = $lib . $name != $node['name'] ? ($lib ? strstr($node['name'], $lib) : $node['name']) : '';
                     // 解析标签属性
-                    $attrs  = $this->parseAttr($node['begin'][0], $name, $alias);
+                    $attrs = $this->parseAttr($node['begin'][0], $name, $alias);
                     $method = 'tag' . $name;
                     // 读取标签库中对应的标签内容 replace[0]用来替换标签头，replace[1]用来替换标签尾
                     $replace = explode($break, $this->$method($attrs, $break));
@@ -157,7 +180,11 @@ class TagLib
                         // 替换标签尾部
                         $content = substr_replace($content, $replace[1], $node['end'][1], strlen($node['end'][0]));
                         // 把标签头压入栈
-                        $beginArray[] = ['pos' => $node['begin'][1], 'len' => strlen($node['begin'][0]), 'str' => $replace[0]];
+                        $beginArray[] = [
+                            'pos' => $node['begin'][1],
+                            'len' => strlen($node['begin'][0]),
+                            'str' => $replace[0]
+                        ];
                     }
                 }
                 while ($beginArray) {
@@ -168,14 +195,14 @@ class TagLib
             }
         }
         // 自闭合标签
-        if (!empty($tags[0])) {
-            $regex   = $this->getRegex(array_keys($tags[0]), 0);
+        if (! empty($tags[0])) {
+            $regex = $this->getRegex(array_keys($tags[0]), 0);
             $content = preg_replace_callback($regex, function ($matches) use (&$tags, &$lib) {
                 // 对应的标签名
-                $name  = $tags[0][strtolower($matches[1])];
+                $name = $tags[0][strtolower($matches[1])];
                 $alias = $lib . $name != $matches[1] ? ($lib ? strstr($matches[1], $lib) : $matches[1]) : '';
                 // 解析标签属性
-                $attrs  = $this->parseAttr($matches[0], $name, $alias);
+                $attrs = $this->parseAttr($matches[0], $name, $alias);
                 $method = 'tag' . $name;
                 return $this->$method($attrs, '');
             }, $content);
@@ -185,16 +212,19 @@ class TagLib
 
     /**
      * 按标签生成正则
+     * 
      * @access private
-     * @param  array|string     $tags 标签名
-     * @param  boolean          $close 是否为闭合标签
+     * @param array|string $tags
+     *            标签名
+     * @param boolean $close
+     *            是否为闭合标签
      * @return string
      */
     public function getRegex($tags, $close)
     {
-        $begin   = $this->tpl->config('taglib_begin');
-        $end     = $this->tpl->config('taglib_end');
-        $single  = strlen(ltrim($begin, '\\')) == 1 && strlen(ltrim($end, '\\')) == 1 ? true : false;
+        $begin = $this->tpl->config('taglib_begin');
+        $end = $this->tpl->config('taglib_end');
+        $single = strlen(ltrim($begin, '\\')) == 1 && strlen(ltrim($end, '\\')) == 1 ? true : false;
         $tagName = is_array($tags) ? implode('|', $tags) : $tags;
         if ($single) {
             if ($close) {
@@ -216,28 +246,32 @@ class TagLib
 
     /**
      * 分析标签属性 正则方式
+     * 
      * @access public
-     * @param string $str 标签属性字符串
-     * @param string $name 标签名
-     * @param string $alias 别名
+     * @param string $str
+     *            标签属性字符串
+     * @param string $name
+     *            标签名
+     * @param string $alias
+     *            别名
      * @return array
      */
     public function parseAttr($str, $name, $alias = '')
     {
-        $regex  = '/\s+(?>(?P<name>[\w-]+)\s*)=(?>\s*)([\"\'])(?P<value>(?:(?!\\2).)*)\\2/is';
+        $regex = '/\s+(?>(?P<name>[\w-]+)\s*)=(?>\s*)([\"\'])(?P<value>(?:(?!\\2).)*)\\2/is';
         $result = [];
         if (preg_match_all($regex, $str, $matches)) {
             foreach ($matches['name'] as $key => $val) {
                 $result[$val] = $matches['value'][$key];
             }
-            if (!isset($this->tags[$name])) {
+            if (! isset($this->tags[$name])) {
                 // 检测是否存在别名定义
                 foreach ($this->tags as $key => $val) {
                     if (isset($val['alias'])) {
                         $array = (array) $val['alias'];
                         if (in_array($name, explode(',', $array[0]))) {
-                            $tag           = $val;
-                            $type          = !empty($array[1]) ? $array[1] : 'type';
+                            $tag = $val;
+                            $type = ! empty($array[1]) ? $array[1] : 'type';
                             $result[$type] = $name;
                             break;
                         }
@@ -246,32 +280,32 @@ class TagLib
             } else {
                 $tag = $this->tags[$name];
                 // 设置了标签别名
-                if (!empty($alias) && isset($tag['alias'])) {
-                    $type          = !empty($tag['alias'][1]) ? $tag['alias'][1] : 'type';
+                if (! empty($alias) && isset($tag['alias'])) {
+                    $type = ! empty($tag['alias'][1]) ? $tag['alias'][1] : 'type';
                     $result[$type] = $alias;
                 }
             }
-            if (!empty($tag['must'])) {
+            if (! empty($tag['must'])) {
                 $must = explode(',', $tag['must']);
                 foreach ($must as $name) {
-                    if (!isset($result[$name])) {
+                    if (! isset($result[$name])) {
                         throw new Exception('tag attr must:' . $name);
                     }
                 }
             }
         } else {
             // 允许直接使用表达式的标签
-            if (!empty($this->tags[$name]['expression'])) {
+            if (! empty($this->tags[$name]['expression'])) {
                 static $_taglibs;
-                if (!isset($_taglibs[$name])) {
+                if (! isset($_taglibs[$name])) {
                     $_taglibs[$name][0] = strlen(ltrim($this->tpl->config('taglib_begin'), '\\') . $name);
                     $_taglibs[$name][1] = strlen(ltrim($this->tpl->config('taglib_end'), '\\'));
                 }
-                $result['expression'] = substr($str, $_taglibs[$name][0], -$_taglibs[$name][1]);
+                $result['expression'] = substr($str, $_taglibs[$name][0], - $_taglibs[$name][1]);
                 // 清除自闭合标签尾部/
                 $result['expression'] = rtrim($result['expression'], '/');
                 $result['expression'] = trim($result['expression']);
-            } elseif (empty($this->tags[$name]) || !empty($this->tags[$name]['attr'])) {
+            } elseif (empty($this->tags[$name]) || ! empty($this->tags[$name]['attr'])) {
                 throw new Exception('tag error:' . $name);
             }
         }
@@ -280,8 +314,10 @@ class TagLib
 
     /**
      * 解析条件表达式
+     * 
      * @access public
-     * @param  string $condition 表达式标签内容
+     * @param string $condition
+     *            表达式标签内容
      * @return string
      */
     public function parseCondition($condition)
@@ -297,8 +333,10 @@ class TagLib
 
     /**
      * 自动识别构建变量
+     * 
      * @access public
-     * @param string $name 变量描述
+     * @param string $name
+     *            变量描述
      * @return string
      */
     public function autoBuildVar(&$name)
@@ -323,6 +361,7 @@ class TagLib
 
     /**
      * 获取标签列表
+     * 
      * @access public
      * @return array
      */

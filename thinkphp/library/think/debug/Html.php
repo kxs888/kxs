@@ -8,7 +8,6 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
 namespace think\debug;
 
 use think\Cache;
@@ -23,40 +22,51 @@ use think\Response;
  */
 class Html
 {
+
     protected $config = [
         'trace_file' => '',
-        'trace_tabs' => ['base' => '基本', 'file' => '文件', 'info' => '流程', 'notice|error' => '错误', 'sql' => 'SQL', 'debug|log' => '调试'],
+        'trace_tabs' => [
+            'base' => '基本',
+            'file' => '文件',
+            'info' => '流程',
+            'notice|error' => '错误',
+            'sql' => 'SQL',
+            'debug|log' => '调试'
+        ]
     ];
-
+    
     // 实例化并传入参数
     public function __construct(array $config = [])
     {
         $this->config['trace_file'] = THINK_PATH . 'tpl/page_trace.tpl';
-        $this->config               = array_merge($this->config, $config);
+        $this->config = array_merge($this->config, $config);
     }
 
     /**
      * 调试输出接口
+     * 
      * @access public
-     * @param Response  $response Response对象
-     * @param array     $log 日志信息
+     * @param Response $response
+     *            Response对象
+     * @param array $log
+     *            日志信息
      * @return bool
      */
     public function output(Response $response, array $log = [])
     {
-        $request     = Request::instance();
+        $request = Request::instance();
         $contentType = $response->getHeader('Content-Type');
-        $accept      = $request->header('accept');
+        $accept = $request->header('accept');
         if (strpos($accept, 'application/json') === 0 || $request->isAjax()) {
             return false;
-        } elseif (!empty($contentType) && strpos($contentType, 'html') === false) {
+        } elseif (! empty($contentType) && strpos($contentType, 'html') === false) {
             return false;
         }
         // 获取基本信息
         $runtime = number_format(microtime(true) - THINK_START_TIME, 10);
-        $reqs    = $runtime > 0 ? number_format(1 / $runtime, 2) : '∞';
-        $mem     = number_format((memory_get_usage() - THINK_START_MEM) / 1024, 2);
-
+        $reqs = $runtime > 0 ? number_format(1 / $runtime, 2) : '∞';
+        $mem = number_format((memory_get_usage() - THINK_START_MEM) / 1024, 2);
+        
         // 页面Trace信息
         if (isset($_SERVER['HTTP_HOST'])) {
             $uri = $_SERVER['SERVER_PROTOCOL'] . ' ' . $_SERVER['REQUEST_METHOD'] . ' : ' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
@@ -68,15 +78,15 @@ class Html
             '运行时间' => number_format($runtime, 6) . 's [ 吞吐率：' . $reqs . 'req/s ] 内存消耗：' . $mem . 'kb 文件加载：' . count(get_included_files()),
             '查询信息' => Db::$queryTimes . ' queries ' . Db::$executeTimes . ' writes ',
             '缓存信息' => Cache::$readTimes . ' reads,' . Cache::$writeTimes . ' writes',
-            '配置加载' => count(Config::get()),
+            '配置加载' => count(Config::get())
         ];
-
+        
         if (session_id()) {
             $base['会话信息'] = 'SESSION_ID=' . session_id();
         }
-
+        
         $info = Debug::getFile(true);
-
+        
         // 页面Trace信息
         $trace = [];
         foreach ($this->config['trace_tabs'] as $name => $title) {
@@ -91,7 +101,7 @@ class Html
                 default: // 调试信息
                     if (strpos($name, '|')) {
                         // 多组信息
-                        $names  = explode('|', $name);
+                        $names = explode('|', $name);
                         $result = [];
                         foreach ($names as $name) {
                             $result = array_merge($result, isset($log[$name]) ? $log[$name] : []);
@@ -107,5 +117,4 @@ class Html
         include $this->config['trace_file'];
         return ob_get_clean();
     }
-
 }

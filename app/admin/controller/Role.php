@@ -7,13 +7,17 @@ use think\Loader;
 use think\Db;
 
 /**
-* 角色管理
-* @author aierui github  https://github.com/Aierui
-* @version 1.0 
-*/
+ * 角色管理
+ * 
+ * @author aierui github https://github.com/Aierui
+ * @version 1.0
+ *         
+ */
 class Role extends Admin
 {
+
     private $role;
+
     function _initialize()
     {
         parent::_initialize();
@@ -30,12 +34,12 @@ class Role extends Admin
 
     public function getList()
     {
-        if(!request()->isAjax()) {
+        if (! request()->isAjax()) {
             $this->error(lang('Request type error'), 4001);
         }
-
+        
         $request = request()->param();
-        $data = model('Role')->getList( $request );
+        $data = model('Role')->getList($request);
         return $data;
     }
 
@@ -44,30 +48,34 @@ class Role extends Admin
         return $this->fetch('edit');
     }
 
-
     public function edit($id = 0)
     {
         $id = input('id', '', 'intval');
-        $data = model('role')->get(['id'=>$id]);
+        $data = model('role')->get([
+            'id' => $id
+        ]);
         $this->assign('data', $data);
         return $this->fetch();
     }
 
     public function saveData()
     {
-        if( !request()->isAjax() ) {
+        if (! request()->isAjax()) {
             $this->error(lang('Request type error'));
         }
         $data = input('post.');
-        return model('role')->saveData( $data );
+        return model('role')->saveData($data);
     }
 
     /**
      * 删除
-     * @param  string $id 数据ID（主键）
+     * 
+     * @param string $id
+     *            数据ID（主键）
      */
-    public function delete($id = 0){
-        if(empty($id)){
+    public function delete($id = 0)
+    {
+        if (empty($id)) {
             return info(lang('Data ID exception'), 0);
         }
         return model('Role')->deleteById($id);

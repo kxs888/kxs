@@ -5,7 +5,6 @@ use \think\Config;
 use \think\Db;
 
 /**
- *
  */
 class DbManage
 {
@@ -16,26 +15,29 @@ class DbManage
     // 每条sql语句的结尾符
     private static $sqlEnd = ";";
 
- 
     public static function backup($table, $dir = "backupMysql")
     {
         $dir = RUNTIME_PATH . $dir . DS . date('Y-m-d') . DS;
-        if (!file_exists($dir)) {
+        if (! file_exists($dir)) {
             mkdir($dir, 0755, true);
         }
         $filename = $table . ".sql";
-
+        
         $sql = self::_startBackup($table);
-
+        
         return file_put_contents($dir . $filename, $sql);
     }
+
     /**
      * 备份数据表
- 
-     * @param    [type]                   $table [description]
-     * @param    [type]                   $dir   [description]
-     * @param    [type]                   $size  [description]
-     * @return   [type]                          [description]
+     *
+     * @param [type] $table
+     *            [description]
+     * @param [type] $dir
+     *            [description]
+     * @param [type] $size
+     *            [description]
+     * @return [type] [description]
      */
     private static function _startBackup($table)
     {
@@ -44,38 +46,37 @@ class DbManage
         } catch (\PDOException $e) {
             return false;
         }
-
+        
         // 插入dump信息
         $sql = self::_retrieve();
-
+        
         $sql .= self::_insertTableStructure($table);
-
+        
         // 数据总条数
         $count = Db::table($table)->count();
         if ($count == 0) {
-
+            
             return $sql;
         }
-
+        
         // 数据总页数
         $pageSize = ceil($count / self::$size);
-
-        //数据备份
+        
+        // 数据备份
         $sql .= self::_insertRecord($table, $pageSize);
-
+        
         return $sql;
-
     }
 
     /**
      * 插入数据库备份基础信息
- 
-     * @return   [type]                   [description]
+     *
+     * @return [type] [description]
      */
     private static function _retrieve()
     {
         $version = self::get('select VERSION() as v');
-
+        
         $value = '';
         $value .= '--' . self::$ds;
         $value .= '-- MySQL database dump' . self::$ds;
@@ -97,8 +98,10 @@ class DbManage
 
     /**
      * 插入表结构
-     * @param    string                   $value [description]
-     * @return   [type]                          [description]
+     * 
+     * @param string $value
+     *            [description]
+     * @return [type] [description]
      */
     private static function _insertTableStructure($table)
     {
@@ -106,34 +109,35 @@ class DbManage
         $sql .= "--" . self::$ds;
         $sql .= "-- 表的结构" . $table . self::$ds;
         $sql .= "--" . self::$ds . self::$ds;
-
+        
         // 如果存在则删除表
         $sql .= self::dropTableIfExists($table);
-
+        
         $res = self::get("SHOW CREATE TABLE `user`;");
-
+        
         $sql .= $res['Create Table'] . self::$sqlEnd . self::$ds;
-
+        
         $sql .= self::$ds;
         $sql .= "--" . self::$ds;
         $sql .= "-- 转存表中的数据 " . $table . self::$ds;
         $sql .= "--" . self::$ds;
         $sql .= self::$ds;
         return $sql;
-
     }
 
     /**
      * [_insertRecord description]
-     * @param    [type]                   $record [description]
-     * @return   [type]                           [description]
+     * 
+     * @param [type] $record
+     *            [description]
+     * @return [type] [description]
      */
     private static function _insertRecord($table, $pageSize)
     {
         $sql = "INSERT INTO `{$table}` VALUES " . self::$ds;
-
-        for ($i = 0; $i < $pageSize; $i++) {
-            $rows       = Db::table($table)->limit($i, self::$size)->select();
+        
+        for ($i = 0; $i < $pageSize; $i ++) {
+            $rows = Db::table($table)->limit($i, self::$size)->select();
             $delimiter1 = "";
             foreach ($rows as $row) {
                 $sql .= "{$delimiter1}(";
@@ -146,16 +150,18 @@ class DbManage
                 $delimiter1 = ",";
             }
         }
-
+        
         $sql .= self::$sqlEnd;
-
+        
         return $sql;
     }
 
     /**
-     * 如果存在则删除表 sql 语句 
-     * @param    [type]                   $table [description]
-     * @return   [type]                          [description]
+     * 如果存在则删除表 sql 语句
+     * 
+     * @param [type] $table
+     *            [description]
+     * @return [type] [description]
      */
     private static function dropTableIfExists($table)
     {
@@ -163,9 +169,11 @@ class DbManage
     }
 
     /**
-     * [get description] 
-     * @param    [type]                   $sql [description]
-     * @return   [type]                        [description]
+     * [get description]
+     * 
+     * @param [type] $sql
+     *            [description]
+     * @return [type] [description]
      */
     private static function get($sql)
     {

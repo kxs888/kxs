@@ -8,7 +8,6 @@
 // +----------------------------------------------------------------------
 // | Author: 刘志淳 <chun@engineer.com>
 // +----------------------------------------------------------------------
-
 namespace think\console\command\make;
 
 use think\Config;
@@ -33,7 +32,7 @@ class Controller extends Make
         if ($this->input->getOption('plain')) {
             return __DIR__ . '/stubs/controller.plain.stub';
         }
-
+        
         return __DIR__ . '/stubs/controller.stub';
     }
 
@@ -46,5 +45,4 @@ class Controller extends Make
     {
         return parent::getNamespace($appNamespace, $module) . '\controller';
     }
-
 }

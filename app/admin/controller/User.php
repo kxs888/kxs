@@ -3,12 +3,13 @@ namespace app\admin\controller;
 
 use think\Loader;
 
-
 /**
-* 用户管理
-* @author aierui github  https://github.com/Aierui
-* @version 1.0 
-*/
+ * 用户管理
+ * 
+ * @author aierui github https://github.com/Aierui
+ * @version 1.0
+ *         
+ */
 class User extends Admin
 {
 
@@ -33,12 +34,12 @@ class User extends Admin
      */
     public function getList()
     {
-        if(!request()->isAjax()) {
+        if (! request()->isAjax()) {
             $this->error(lang('Request type error'), 4001);
         }
-
+        
         $request = request()->param();
-        $data = model('User')->getList( $request );
+        $data = model('User')->getList($request);
         return $data;
     }
 
@@ -54,11 +55,13 @@ class User extends Admin
 
     /**
      * 编辑
-     * @param  string $id 数据ID（主键）
+     * 
+     * @param string $id
+     *            数据ID（主键）
      */
     public function edit($id = 0)
-    {   
-        if(intval($id) < 0){
+    {
+        if (intval($id) < 0) {
             return info(lang('Data ID exception'), 0);
         }
         if (intval($id == 1)) {
@@ -66,35 +69,42 @@ class User extends Admin
         }
         $roleData = model('role')->getKvData();
         $this->assign('roleData', $roleData);
-        $data = model('User')->get(['id'=>$id]);
-        $this->assign('data',$data);
+        $data = model('User')->get([
+            'id' => $id
+        ]);
+        $this->assign('data', $data);
         return $this->fetch();
     }
 
     /**
      * 保存数据
-     * @param array $data
+     * 
+     * @param array $data            
      *
      * @author chengbin
      */
     public function saveData()
     {
-        $this->mustCheckRule( 'admin/user/edit' );
-        if(!request()->isAjax()) {
+        $this->mustCheckRule('admin/user/edit');
+        if (! request()->isAjax()) {
             return info(lang('Request type error'));
         }
-
+        
         $data = input('post.');
-        var_dump($data);die;
-        return model('User')->saveData( $data );
+        var_dump($data);
+        die();
+        return model('User')->saveData($data);
     }
 
     /**
      * 删除
-     * @param  string $id 数据ID（主键）
+     * 
+     * @param string $id
+     *            数据ID（主键）
      */
-    public function delete($id = 0){
-        if(empty($id)){
+    public function delete($id = 0)
+    {
+        if (empty($id)) {
             return info(lang('Data ID exception'), 0);
         }
         if (intval($id == 1)) {
@@ -102,6 +112,4 @@ class User extends Admin
         }
         return Loader::model('User')->deleteById($id);
     }
-
-   
 }

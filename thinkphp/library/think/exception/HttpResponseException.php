@@ -8,14 +8,15 @@
 // +----------------------------------------------------------------------
 // | Author: yunwuxin <448901948@qq.com>
 // +----------------------------------------------------------------------
-
 namespace think\exception;
 
 use think\Response;
 
 class HttpResponseException extends \RuntimeException
 {
+
     /**
+     *
      * @var Response
      */
     protected $response;
@@ -29,5 +30,4 @@ class HttpResponseException extends \RuntimeException
     {
         return $this->response;
     }
-
 }

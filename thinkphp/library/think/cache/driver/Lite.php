@@ -8,44 +8,48 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
 namespace think\cache\driver;
 
 use think\cache\Driver;
 
 /**
  * 文件类型缓存类
- * @author    liu21st <liu21st@gmail.com>
+ * 
+ * @author liu21st <liu21st@gmail.com>
  */
 class Lite extends Driver
 {
+
     protected $options = [
         'prefix' => '',
-        'path'   => '',
-        'expire' => 0, // 等于 10*365*24*3600（10年）
-    ];
+        'path' => '',
+        'expire' => 0
+    ] // 等于 10*365*24*3600（10年）
+;
 
     /**
      * 构造函数
+     * 
      * @access public
-     *
-     * @param array $options
+     *        
+     * @param array $options            
      */
     public function __construct($options = [])
     {
-        if (!empty($options)) {
+        if (! empty($options)) {
             $this->options = array_merge($this->options, $options);
         }
-        if (substr($this->options['path'], -1) != DS) {
+        if (substr($this->options['path'], - 1) != DS) {
             $this->options['path'] .= DS;
         }
-
     }
 
     /**
      * 取得变量的存储文件名
+     * 
      * @access protected
-     * @param string $name 缓存变量名
+     * @param string $name
+     *            缓存变量名
      * @return string
      */
     protected function getCacheKey($name)
@@ -55,8 +59,10 @@ class Lite extends Driver
 
     /**
      * 判断缓存是否存在
+     * 
      * @access public
-     * @param string $name 缓存变量名
+     * @param string $name
+     *            缓存变量名
      * @return mixed
      */
     public function has($name)
@@ -66,9 +72,12 @@ class Lite extends Driver
 
     /**
      * 读取缓存
+     * 
      * @access public
-     * @param string $name 缓存变量名
-     * @param mixed  $default 默认值
+     * @param string $name
+     *            缓存变量名
+     * @param mixed $default
+     *            默认值
      * @return mixed
      */
     public function get($name, $default = false)
@@ -90,10 +99,14 @@ class Lite extends Driver
 
     /**
      * 写入缓存
-     * @access   public
-     * @param string    $name  缓存变量名
-     * @param mixed     $value 存储数据
-     * @param int       $expire 有效时间 0为永久
+     * 
+     * @access public
+     * @param string $name
+     *            缓存变量名
+     * @param mixed $value
+     *            存储数据
+     * @param int $expire
+     *            有效时间 0为永久
      * @return bool
      */
     public function set($name, $value, $expire = null)
@@ -106,7 +119,7 @@ class Lite extends Driver
             $expire = 10 * 365 * 24 * 3600;
         }
         $filename = $this->getCacheKey($name);
-        if ($this->tag && !is_file($filename)) {
+        if ($this->tag && ! is_file($filename)) {
             $first = true;
         }
         $ret = file_put_contents($filename, ("<?php return " . var_export($value, true) . ";"));
@@ -120,9 +133,12 @@ class Lite extends Driver
 
     /**
      * 自增缓存（针对数值缓存）
+     * 
      * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
+     * @param string $name
+     *            缓存变量名
+     * @param int $step
+     *            步长
      * @return false|int
      */
     public function inc($name, $step = 1)
@@ -137,9 +153,12 @@ class Lite extends Driver
 
     /**
      * 自减缓存（针对数值缓存）
+     * 
      * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
+     * @param string $name
+     *            缓存变量名
+     * @param int $step
+     *            步长
      * @return false|int
      */
     public function dec($name, $step = 1)
@@ -154,8 +173,10 @@ class Lite extends Driver
 
     /**
      * 删除缓存
+     * 
      * @access public
-     * @param string $name 缓存变量名
+     * @param string $name
+     *            缓存变量名
      * @return boolean
      */
     public function rm($name)
@@ -165,8 +186,10 @@ class Lite extends Driver
 
     /**
      * 清除缓存
-     * @access   public
-     * @param string $tag 标签名
+     * 
+     * @access public
+     * @param string $tag
+     *            标签名
      * @return bool
      */
     public function clear($tag = null)

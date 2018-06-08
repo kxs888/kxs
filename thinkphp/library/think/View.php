@@ -8,7 +8,6 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
 namespace think;
 
 class View
@@ -26,9 +25,12 @@ class View
 
     /**
      * 构造函数
+     * 
      * @access public
-     * @param array $engine  模板引擎参数
-     * @param array $replace  字符串替换参数
+     * @param array $engine
+     *            模板引擎参数
+     * @param array $replace
+     *            字符串替换参数
      */
     public function __construct($engine = [], $replace = [])
     {
@@ -36,26 +38,29 @@ class View
         $this->engine((array) $engine);
         // 基础替换字符串
         $request = Request::instance();
-        $base    = $request->root();
-        $root    = strpos($base, '.') ? ltrim(dirname($base), DS) : $base;
+        $base = $request->root();
+        $root = strpos($base, '.') ? ltrim(dirname($base), DS) : $base;
         if ('' != $root) {
             $root = '/' . ltrim($root, '/');
         }
         $baseReplace = [
-            '__ROOT__'   => $root,
-            '__URL__'    => $base . '/' . $request->module() . '/' . Loader::parseName($request->controller()),
+            '__ROOT__' => $root,
+            '__URL__' => $base . '/' . $request->module() . '/' . Loader::parseName($request->controller()),
             '__STATIC__' => $root . '/static',
-            '__CSS__'    => $root . '/static/css',
-            '__JS__'     => $root . '/static/js',
+            '__CSS__' => $root . '/static/css',
+            '__JS__' => $root . '/static/js'
         ];
         $this->replace = array_merge($baseReplace, (array) $replace);
     }
 
     /**
      * 初始化视图
+     * 
      * @access public
-     * @param array $engine  模板引擎参数
-     * @param array $replace  字符串替换参数
+     * @param array $engine
+     *            模板引擎参数
+     * @param array $replace
+     *            字符串替换参数
      * @return object
      */
     public static function instance($engine = [], $replace = [])
@@ -68,9 +73,12 @@ class View
 
     /**
      * 模板变量静态赋值
+     * 
      * @access public
-     * @param mixed $name  变量名
-     * @param mixed $value 变量值
+     * @param mixed $name
+     *            变量名
+     * @param mixed $value
+     *            变量值
      * @return void
      */
     public static function share($name, $value = '')
@@ -84,9 +92,12 @@ class View
 
     /**
      * 模板变量赋值
+     * 
      * @access public
-     * @param mixed $name  变量名
-     * @param mixed $value 变量值
+     * @param mixed $name
+     *            变量名
+     * @param mixed $value
+     *            变量值
      * @return $this
      */
     public function assign($name, $value = '')
@@ -101,19 +112,21 @@ class View
 
     /**
      * 设置当前模板解析的引擎
+     * 
      * @access public
-     * @param array|string $options 引擎参数
+     * @param array|string $options
+     *            引擎参数
      * @return $this
      */
     public function engine($options = [])
     {
         if (is_string($options)) {
-            $type    = $options;
+            $type = $options;
             $options = [];
         } else {
-            $type = !empty($options['type']) ? $options['type'] : 'Think';
+            $type = ! empty($options['type']) ? $options['type'] : 'Think';
         }
-
+        
         $class = false !== strpos($type, '\\') ? $type : '\\think\\view\\driver\\' . ucfirst($type);
         if (isset($options['type'])) {
             unset($options['type']);
@@ -124,9 +137,12 @@ class View
 
     /**
      * 配置模板引擎
+     * 
      * @access private
-     * @param string|array  $name 参数名
-     * @param mixed         $value 参数值
+     * @param string|array $name
+     *            参数名
+     * @param mixed $value
+     *            参数值
      * @return void
      */
     public function config($name, $value = null)
@@ -137,11 +153,17 @@ class View
 
     /**
      * 解析和获取模板内容 用于输出
-     * @param string    $template 模板文件名或者内容
-     * @param array     $vars     模板输出变量
-     * @param array     $replace 替换内容
-     * @param array     $config     模板参数
-     * @param bool      $renderContent     是否渲染内容
+     * 
+     * @param string $template
+     *            模板文件名或者内容
+     * @param array $vars
+     *            模板输出变量
+     * @param array $replace
+     *            替换内容
+     * @param array $config
+     *            模板参数
+     * @param bool $renderContent
+     *            是否渲染内容
      * @return string
      * @throws Exception
      */
@@ -149,22 +171,22 @@ class View
     {
         // 模板变量
         $vars = array_merge(self::$var, $this->data, $vars);
-
+        
         // 页面缓存
         ob_start();
         ob_implicit_flush(0);
-
+        
         // 渲染输出
         $method = $renderContent ? 'display' : 'fetch';
         $this->engine->$method($template, $vars, $config);
-
+        
         // 获取并清空缓存
         $content = ob_get_clean();
         // 内容过滤标签
         Hook::listen('view_filter', $content);
         // 允许用户自定义模板的字符串替换
         $replace = array_merge($this->replace, $replace);
-        if (!empty($replace)) {
+        if (! empty($replace)) {
             $content = strtr($content, $replace);
         }
         return $content;
@@ -172,9 +194,12 @@ class View
 
     /**
      * 视图内容替换
+     * 
      * @access public
-     * @param string|array  $content 被替换内容（支持批量替换）
-     * @param string        $replace    替换内容
+     * @param string|array $content
+     *            被替换内容（支持批量替换）
+     * @param string $replace
+     *            替换内容
      * @return $this
      */
     public function replace($content, $replace = '')
@@ -189,11 +214,16 @@ class View
 
     /**
      * 渲染内容输出
+     * 
      * @access public
-     * @param string $content 内容
-     * @param array  $vars    模板输出变量
-     * @param array  $replace 替换内容
-     * @param array  $config     模板参数
+     * @param string $content
+     *            内容
+     * @param array $vars
+     *            模板输出变量
+     * @param array $replace
+     *            替换内容
+     * @param array $config
+     *            模板参数
      * @return mixed
      */
     public function display($content, $vars = [], $replace = [], $config = [])
@@ -203,9 +233,12 @@ class View
 
     /**
      * 模板变量赋值
+     * 
      * @access public
-     * @param string    $name  变量名
-     * @param mixed     $value 变量值
+     * @param string $name
+     *            变量名
+     * @param mixed $value
+     *            变量值
      */
     public function __set($name, $value)
     {
@@ -214,8 +247,10 @@ class View
 
     /**
      * 取得模板显示变量的值
+     * 
      * @access protected
-     * @param string $name 模板变量
+     * @param string $name
+     *            模板变量
      * @return mixed
      */
     public function __get($name)
@@ -225,8 +260,10 @@ class View
 
     /**
      * 检测模板变量是否设置
+     * 
      * @access public
-     * @param string $name 模板变量名
+     * @param string $name
+     *            模板变量名
      * @return bool
      */
     public function __isset($name)

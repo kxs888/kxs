@@ -8,30 +8,32 @@
 // +----------------------------------------------------------------------
 // | Author: 麦当苗儿 <zuojiazi@vip.qq.com> <http://zjzit.cn>
 // +----------------------------------------------------------------------
-
 namespace think\db\exception;
 
 use think\exception\DbException;
 
 class ModelNotFoundException extends DbException
 {
+
     protected $model;
 
     /**
      * 构造方法
-     * @param string $message
-     * @param string $model
+     * 
+     * @param string $message            
+     * @param string $model            
      */
     public function __construct($message, $model = '', array $config = [])
     {
         $this->message = $message;
-        $this->model   = $model;
-
+        $this->model = $model;
+        
         $this->setData('Database Config', $config);
     }
 
     /**
      * 获取模型类名
+     * 
      * @access public
      * @return string
      */
@@ -39,5 +41,4 @@ class ModelNotFoundException extends DbException
     {
         return $this->model;
     }
-
 }

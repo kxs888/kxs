@@ -19,6 +19,7 @@ use think\Db;
 
 class Schema extends Command
 {
+
     /** @var  Output */
     protected $output;
 
@@ -34,7 +35,7 @@ class Schema extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        if (!is_dir(RUNTIME_PATH . 'schema')) {
+        if (! is_dir(RUNTIME_PATH . 'schema')) {
             @mkdir(RUNTIME_PATH . 'schema', 0755, true);
         }
         $config = [];
@@ -45,7 +46,7 @@ class Schema extends Command
             $module = $input->getOption('module');
             // 读取模型
             $list = scandir(APP_PATH . $module . DS . 'model');
-            $app  = App::$namespace;
+            $app = App::$namespace;
             foreach ($list as $file) {
                 if (0 === strpos($file, '.')) {
                     continue;
@@ -57,15 +58,15 @@ class Schema extends Command
             return;
         } elseif ($input->hasOption('table')) {
             $table = $input->getOption('table');
-            if (!strpos($table, '.')) {
+            if (! strpos($table, '.')) {
                 $dbName = Db::connect($config)->getConfig('database');
             }
             $tables[] = $table;
         } elseif ($input->hasOption('db')) {
             $dbName = $input->getOption('db');
             $tables = Db::connect($config)->getTables($dbName);
-        } elseif (!\think\Config::get('app_multi_module')) {
-            $app  = App::$namespace;
+        } elseif (! \think\Config::get('app_multi_module')) {
+            $app = App::$namespace;
             $list = scandir(APP_PATH . 'model');
             foreach ($list as $file) {
                 if (0 === strpos($file, '.')) {
@@ -79,21 +80,21 @@ class Schema extends Command
         } else {
             $tables = Db::connect($config)->getTables();
         }
-
+        
         $db = isset($dbName) ? $dbName . '.' : '';
         $this->buildDataBaseSchema($tables, $db, $config);
-
+        
         $output->writeln('<info>Succeed!</info>');
     }
 
     protected function buildModelSchema($class)
     {
         $reflect = new \ReflectionClass($class);
-        if (!$reflect->isAbstract() && $reflect->isSubclassOf('\think\Model')) {
-            $table   = $class::getTable();
-            $dbName  = $class::getConfig('database');
+        if (! $reflect->isAbstract() && $reflect->isSubclassOf('\think\Model')) {
+            $table = $class::getTable();
+            $dbName = $class::getConfig('database');
             $content = '<?php ' . PHP_EOL . 'return ';
-            $info    = $class::getConnection()->getFields($table);
+            $info = $class::getConnection()->getFields($table);
             $content .= var_export($info, true) . ';';
             file_put_contents(RUNTIME_PATH . 'schema' . DS . $dbName . '.' . $table . EXT, $content);
         }
@@ -108,7 +109,7 @@ class Schema extends Command
         }
         foreach ($tables as $table) {
             $content = '<?php ' . PHP_EOL . 'return ';
-            $info    = Db::connect($config)->getFields($db . $table);
+            $info = Db::connect($config)->getFields($db . $table);
             $content .= var_export($info, true) . ';';
             file_put_contents(RUNTIME_PATH . 'schema' . DS . $dbName . $table . EXT, $content);
         }

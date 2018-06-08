@@ -8,42 +8,47 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
 namespace think\cache\driver;
 
 use think\cache\Driver;
 
 /**
  * Wincache缓存驱动
- * @author    liu21st <liu21st@gmail.com>
+ * 
+ * @author liu21st <liu21st@gmail.com>
  */
 class Wincache extends Driver
 {
+
     protected $options = [
         'prefix' => '',
-        'expire' => 0,
+        'expire' => 0
     ];
 
     /**
      * 构造函数
-     * @param array $options 缓存参数
+     * 
+     * @param array $options
+     *            缓存参数
      * @throws \BadFunctionCallException
      * @access public
      */
     public function __construct($options = [])
     {
-        if (!function_exists('wincache_ucache_info')) {
+        if (! function_exists('wincache_ucache_info')) {
             throw new \BadFunctionCallException('not support: WinCache');
         }
-        if (!empty($options)) {
+        if (! empty($options)) {
             $this->options = array_merge($this->options, $options);
         }
     }
 
     /**
      * 判断缓存
+     * 
      * @access public
-     * @param string $name 缓存变量名
+     * @param string $name
+     *            缓存变量名
      * @return bool
      */
     public function has($name)
@@ -54,9 +59,12 @@ class Wincache extends Driver
 
     /**
      * 读取缓存
+     * 
      * @access public
-     * @param string $name 缓存变量名
-     * @param mixed  $default 默认值
+     * @param string $name
+     *            缓存变量名
+     * @param mixed $default
+     *            默认值
      * @return mixed
      */
     public function get($name, $default = false)
@@ -67,10 +75,14 @@ class Wincache extends Driver
 
     /**
      * 写入缓存
+     * 
      * @access public
-     * @param string    $name 缓存变量名
-     * @param mixed     $value  存储数据
-     * @param integer   $expire  有效时间（秒）
+     * @param string $name
+     *            缓存变量名
+     * @param mixed $value
+     *            存储数据
+     * @param integer $expire
+     *            有效时间（秒）
      * @return boolean
      */
     public function set($name, $value, $expire = null)
@@ -79,7 +91,7 @@ class Wincache extends Driver
             $expire = $this->options['expire'];
         }
         $key = $this->getCacheKey($name);
-        if ($this->tag && !$this->has($name)) {
+        if ($this->tag && ! $this->has($name)) {
             $first = true;
         }
         if (wincache_ucache_set($key, $value, $expire)) {
@@ -91,9 +103,12 @@ class Wincache extends Driver
 
     /**
      * 自增缓存（针对数值缓存）
+     * 
      * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
+     * @param string $name
+     *            缓存变量名
+     * @param int $step
+     *            步长
      * @return false|int
      */
     public function inc($name, $step = 1)
@@ -104,9 +119,12 @@ class Wincache extends Driver
 
     /**
      * 自减缓存（针对数值缓存）
+     * 
      * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
+     * @param string $name
+     *            缓存变量名
+     * @param int $step
+     *            步长
      * @return false|int
      */
     public function dec($name, $step = 1)
@@ -117,8 +135,10 @@ class Wincache extends Driver
 
     /**
      * 删除缓存
+     * 
      * @access public
-     * @param string $name 缓存变量名
+     * @param string $name
+     *            缓存变量名
      * @return boolean
      */
     public function rm($name)
@@ -128,8 +148,10 @@ class Wincache extends Driver
 
     /**
      * 清除缓存
+     * 
      * @access public
-     * @param string $tag 标签名
+     * @param string $tag
+     *            标签名
      * @return boolean
      */
     public function clear($tag = null)
@@ -145,5 +167,4 @@ class Wincache extends Driver
             return wincache_ucache_clear();
         }
     }
-
 }

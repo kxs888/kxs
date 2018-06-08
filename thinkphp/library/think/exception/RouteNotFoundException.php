@@ -8,7 +8,6 @@
 // +----------------------------------------------------------------------
 // | Author: yunwuxin <448901948@qq.com>
 // +----------------------------------------------------------------------
-
 namespace think\exception;
 
 class RouteNotFoundException extends HttpException
@@ -18,5 +17,4 @@ class RouteNotFoundException extends HttpException
     {
         parent::__construct(404);
     }
-
 }
