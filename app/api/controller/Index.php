@@ -33,7 +33,7 @@ class Index extends Common
         $array = array();
         $user1 = new User();
         $user1->username = input('username');
-        $user1->phone = input['phone'];
+        $user1->phone = input('phone');
         $user1->passwd = input('passwd');
         $res = $this->save();
         if(!$res){
