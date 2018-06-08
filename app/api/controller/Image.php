@@ -3,7 +3,7 @@ namespace app\api\controller;
 use think\Controller;
 class Image{
     
-    public function imageMerge($arr){
+    public function imageMerge(){
         $arr = input('post.');
         dump($name);
         die();
