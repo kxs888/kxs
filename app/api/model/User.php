@@ -1,5 +1,5 @@
 <?php
-namespace app\api\model\User;
+namespace app\api\model;
 use think\Model;
 
 class User extends Model

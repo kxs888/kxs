@@ -2,7 +2,7 @@
 namespace app\api\controller;
 use app\common\controller\Common;
 use think\Db;
-use app\api\model\Member;
+use app\api\model\User;
 // use app\api\Validate;
 // include '../validate/Validate.php';
 class Index extends Common
@@ -119,30 +119,6 @@ class Index extends Common
 //     }
 // }  
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
     
 //         $arr =array();
         
@@ -195,6 +171,5 @@ class Index extends Common
 //          * 虽然看起来复杂点,清楚理解!
 //          * 如果有更好的,可以贴出来,分享快乐!
 //          * */
-        
 //     }
 //    }
