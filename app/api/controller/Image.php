@@ -23,7 +23,7 @@ class Image{
         $fontSize = 20;
         $circleSize = 0;  
         $fontBox = imagettfbbox($fontSize, 0, $font, $name);
-        imagefttext($image1,$fontSize,$circleSize,80,80,$black,$font,$name);
+        imagefttext($image1,$fontSize,$circleSize,210,450,$black,$font,$name);
         
         
         
