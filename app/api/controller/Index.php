@@ -3,7 +3,8 @@ namespace app\api\controller;
 use app\common\controller\Common;
 use think\Db;
 use app\api\model\User;
-use app\api\Validate\Validate;
+// use app\api\Validate\Validate;
+require_once '../validate/Validate.php';
 
 class Index extends Common
 {
