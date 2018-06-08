@@ -3,8 +3,8 @@ namespace app\api\controller;
 use think\Controller;
 class Image{
     
-    public function imageMerge($name){
-        $name = input('post.name');
+    public function imageMerge($arr){
+        $arr['name'] = input('post.name');
         echo $name;
         // 图片一  
         $path1 = '../public/static/admin/images/3.jpg';  
@@ -24,7 +24,7 @@ class Image{
         $fontSize = 20;
         $circleSize = 0;  
         $fontBox = imagettfbbox($fontSize, 0, $font, $name);
-        imagefttext($image1,$fontSize,$circleSize,50,50,$black,$font,$name);
+        imagefttext($image1,$fontSize,$circleSize,50,50,$black,$font,$arr['name']);
         
         
         
