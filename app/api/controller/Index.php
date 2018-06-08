@@ -37,7 +37,7 @@ class Index extends Common
         $user1->phone = input('phone');
         $user1->passwd = md5(input('passwd'));
         $user1->create_time = input('create_time');
-        $res = Db::name('user')->where('phone',$user->phone)->find();
+        $res = Db::name('user')->where('phone',$user1->phone)->find();
         if(!empty($res)){
             $array['code'] = -1;
             $array['msg'] = '已注册';
