@@ -85,7 +85,7 @@ class Index extends Common
                 return true;
             } else {
                 return false;
-            }l
+            }
     
       function isPWD($passwd){
                 $n = preg_match('/^([a-zA-Z0-9]){6,16}$/', $password);
