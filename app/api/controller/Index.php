@@ -34,8 +34,8 @@ class Index extends Common
         $user1 = new User();
         $user1->username = input('username');
         $user1->phone = input('phone');
-        $user1->passwd = input('passwd');
-        $user1->addtime = input('create_time');
+        $user1->passwd = md5(input('passwd'));
+        $user1->create_time = input('create_time');
         $res = $user1->save();
         if(!$res){
             $array['code'] = -1;
