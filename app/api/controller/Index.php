@@ -36,7 +36,7 @@ class Index extends Common
         $user1->username = input('username');
         $user1->phone = input('phone');
         $user1->passwd = md5(input('passwd'));
-        $user1->create_time = time();
+        $user1->create_time = date('Y-m-d H:i:s');
         $res = Db::name('user')->where('phone',$user1->phone)->find();
         if(!empty($res)){
             $array['code'] = -1;
