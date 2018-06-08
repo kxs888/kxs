@@ -1,6 +1,7 @@
 <?php
 namespace app\api\controller;
 use app\common\controller\Common;
+use think\Db;
 use app\api\model\Member;
 // use app\api\Validate;
 // include '../validate/Validate.php';
@@ -8,13 +9,36 @@ class Index extends Common
 {
   
     public function login(){
-        $res = array();
-        $username = $this->request->post("username");
-        $res['code'] = 0;
-        $res['msg'] = '登录成功';
+        $array = array();
+        $res = input('post.');
+        $user = Db::name('user')->where('phone',$res['phone'])->find();
+        if(!$user){
+            $array['code'] = -1;
+            $array['msg']  = '用户不存在';
+        }
+         
+        if (md5($res['passwd']) != ($user['passwd'])) {
+            $array['code'] = -1;
+            $array['msg']  = '密码不正确';
+        } else {
+            $array['code'] = 0;
+            $array['msg']  = '登陆成功';
         
-        return json_encode($res, JSON_UNESCAPED_UNICODE);
-    }
+        }
+             return $array;
+        
+        
+    }  
+        
+        
+        
+//         $res = array();
+//         $phone = $this->request->post("phone");
+//         $res['code'] = 0;
+//         $res['msg'] = '登录成功';
+        
+//         return json_encode($res, JSON_UNESCAPED_UNICODE);
+    
     public function register(){
      
         
