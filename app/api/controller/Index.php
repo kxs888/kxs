@@ -11,7 +11,7 @@ class Index extends Common
         $array = array();
         $res = input('post.');
         $user = Db::name('user')->where('phone',$res['phone'])->select();
-        if(!$user){
+        if(empty($user)){
             $array['code'] = -1;
             $array['msg']  = '用户不存在';
             return json_encode($array,JSON_UNESCAPED_UNICODE);
