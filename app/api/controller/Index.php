@@ -39,7 +39,7 @@ class Index extends Common
         if (!Validate::isPhone($user1->phone)) {
             $array['code'] = -1;
             $array['msg'] = '手机号不正确';
-        } elseif (!Validate::isUserName($user1->pusername)){
+        } elseif (!Validate::isUserName($user1->username)){
             $array['code'] = -1;
             $array['msg'] = '用户名格式不正确';
         } else {
