@@ -17,13 +17,13 @@ class Image{
         // 输出合成图片  
         // $imagename = rand(1000,9999).'-'.time().'jpg';
       
-        $name = '给菲菲姐'; 
+        $name = '你瞅啥！'; 
         $font = '../public/static/admin/lib/fangzheng.ttf';
         $black = imagecolorallocate($image1, 255,105,180);//字体颜色 RGB
         $fontSize = 20;
         $circleSize = 0;  
         $fontBox = imagettfbbox($fontSize, 0, $font, $name);
-        imagefttext($image1,$fontSize,$circleSize,210,450,$black,$font,$name);
+        imagefttext($image1,$fontSize,$circleSize,70,80,$black,$font,$name);
         
         
         
