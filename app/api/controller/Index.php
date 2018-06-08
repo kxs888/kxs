@@ -14,18 +14,16 @@ class Index extends Common
         if(!$user){
             $array['code'] = -1;
             $array['msg']  = '用户不存在';
-        if (md5($res['passwd']) != ($user['passwd'])) {
+        } elseif (md5($res['passwd']) != ($user['passwd'])){
             $array['code'] = -1;
             $array['msg']  = '密码不正确';
         } else {
             $array['code'] = 0;
             $array['msg']  = '登陆成功';
-        
         }
-    }
              return json_encode($array,JSON_UNESCAPED_UNICODE);
         
-        
+       
     }  
         
     public function register(){
