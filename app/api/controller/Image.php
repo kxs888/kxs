@@ -1,10 +1,11 @@
 <?php    
 namespace app\api\controller;
-use think\Request;
+use think\Controller;
 class Image{
     
-    public function imageMerge(){
-           
+    public function imageMerge($name){
+        $name = input('post.name');
+        echo $name;
         // 图片一  
         $path1 = '../public/static/admin/images/3.jpg';  
         // 图片二   
@@ -16,9 +17,7 @@ class Image{
         imagecopymerge($image1, $image2, 0, 0, 0, 0, imagesx($image2), imagesy($image2), 100);  
         // 输出合成图片  
         // $imagename = rand(1000,9999).'-'.time().'jpg';
-        $request = Request::instance();
-        $name = $requset->only(['name']);
-        echo $name;  
+      
         exit();   
         $font = '../public/static/admin/lib/fangzheng.ttf';
         $black = imagecolorallocate($image1, 100, 100,100);//字体颜色 RGB
