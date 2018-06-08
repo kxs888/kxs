@@ -25,7 +25,7 @@ class Index extends Common
             $array['msg']  = '登陆成功';
         
         }
-             return $array;
+             return json_encode($array,JSON_UNESCAPED_UNICODE);
         
         
     }  
@@ -197,4 +197,4 @@ class Index extends Common
 //          * */
         
 //     }
-// }
+//    }
