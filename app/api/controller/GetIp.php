@@ -1,4 +1,7 @@
 <?php
+namespace app\api\GetIp;
+
+class GetIp {
 header('Content-Type:text/html;Charset=utf-8');
 function GetIp(){
     $realip = '';
@@ -54,6 +57,6 @@ function GetIpLookup($ip = ''){
     return $json;
 }
 
-
+}
 // $ipInfos = GetIpLookup('123.125.114.144'); //baidu.com IP地址
 // var_dump($ipInfos);
