@@ -59,7 +59,7 @@ class Image
         $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
         $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
         //将字体加入图片中
-        imagefttext($image, $fontSize, $circleSize, 261, 805, $black1, $font, $str);
+        imagefttext($image, $font_size, $circleSize, 261, 805, $black1, $font, $str);
         imagefttext($image, 16, $circleSize, 322, 870, $black2, $font, $date);
         $xid = rand(1000,999).time();
         header('Content-Type:image/png');
