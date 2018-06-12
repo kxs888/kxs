@@ -42,10 +42,10 @@ class Image
     
     public function imgMerge($str,$date){
         //接收数据
-        $str = input('str');
+        $str = Request::instance()->post(['str']);
         $str = trim($str);
-        $date = input('date');
-        //获取底图
+        $date = Request::instance()->post(['date']);
+        //随机获取底图
         $id = rand(1,20).'.png';
         $path = "../public/static/admin/images/$id";
         $image = imagecreatefrompng($path);
@@ -53,9 +53,13 @@ class Image
         $black1 = imagecolorallocate($image, 240, 66, 52); // 字体颜色 RGB
         $black2 = imagecolorallocate($image, 107, 37, 18); // 字体颜色 RGB
         $font =  '../public/static/admin/lib/a.ttf';
-        $font_size ='28';
         $circle_size = '0';
         $len = strlen($str);
+        if($len <= 2){
+            $font_size = 28;
+        } else {
+            $font_size = 22;
+        }
         $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
         $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
         //将字体加入图片中
