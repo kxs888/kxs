@@ -91,13 +91,13 @@ class Image
         //指定字体样式
         $black = imagecolorallocate($image, 3, 25, 154); // 字体颜色 RGB
         $font =  '../public/static/admin/lib/textB.TTF';
-        $font_size = 33;
+//         $font_size = 33;
         $circle_size = '0';
         $len = strlen($str);
         if($len <= 2){
-           imagefttext($image, $font_size, $circle_size, 374, 281, $black, $font, $str);
+           imagefttext($image, 26, $circle_size, 374, 281, $black, $font, $str);
         } elseif($len >=3 ) {
-            imagefttext($image, $font_size, $circle_size, 350, 281, $black, $font, $str);
+            imagefttext($image, 26, $circle_size, 350, 281, $black, $font, $str);
         }
 //         $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
 //         $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
