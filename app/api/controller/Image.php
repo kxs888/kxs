@@ -103,7 +103,7 @@ class Image
         $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
         //将字体加入图片中
         imagefttext($image, $font_size, $circle_size, 374, 281, $black, $font, $str);
-        imagefttext($image, 20, $circle_size, 286, 727, $black, $font, $date);
+        imagefttext($image, 20, $circle_size, 286, 723, $black, $font, $date);
         $xid = time().rand(1000,9999).'.png';
         header('Content-Type:image/png');
         
