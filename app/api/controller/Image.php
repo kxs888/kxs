@@ -2,6 +2,7 @@
 namespace app\api\controller;
 
 use think\Controller;
+use think\Request;
 
 class Image
 {
@@ -42,7 +43,8 @@ class Image
     
     public function imgMerge($str,$date){
         //接收数据
-        $str = Request::instance()->post('str');
+        $request = Request::instance();
+        $str = $request->post('str');
         $str = trim($str);
         $date = Request::instance()->post('date');
         //随机获取底图
