@@ -54,7 +54,7 @@ class Image
         //指定字体样式
         $black1 = imagecolorallocate($image, 240, 66, 52); // 字体颜色 RGB
         $black2 = imagecolorallocate($image, 107, 37, 18); // 字体颜色 RGB
-        $font =  '../public/static/admin/lib/a.ttf';
+        $font =  '../public/static/admin/lib/fangzheng.ttf';
         $circle_size = '0';
         $len = strlen($str);
         if($len <= 2){
