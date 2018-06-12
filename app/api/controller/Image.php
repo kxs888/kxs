@@ -42,9 +42,9 @@ class Image
     
     public function imgMerge($str,$date){
         //接收数据
-        $str = Request::instance()->post(['str']);
+        $str = Request::instance()->post('str');
         $str = trim($str);
-        $date = Request::instance()->post(['date']);
+        $date = Request::instance()->post('date');
         //随机获取底图
         $id = rand(1,20).'.png';
         $path = "../public/static/admin/images/$id";
