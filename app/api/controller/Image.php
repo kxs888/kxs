@@ -53,14 +53,14 @@ class Image
         $black1 = imagecolorallocate($image, 240, 66, 52); // 字体颜色 RGB
         $black2 = imagecolorallocate($image, 255, 105, 180); // 字体颜色 RGB
         $font =  '../public/static/admin/lib/fangzheng.ttf';
-        $font_size ='20';
+        $font_size ='33';
         $circle_size = '0';
         $len = strlen($str);
         $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
         $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
         //将字体加入图片中
         imagefttext($image, $font_size, $circle_size, 261, 805, $black1, $font, $str);
-        imagefttext($image, 16, $circle_size, 322, 870, $black2, $font, $date);
+        imagefttext($image, 26, $circle_size, 322, 870, $black2, $font, $date);
         $xid = rand(1000,999).'.png';
         header('Content-Type:image/png');
         
