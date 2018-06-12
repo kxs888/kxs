@@ -85,9 +85,9 @@ class Image
         $str = trim($str);
         $date = Request::instance()->post('date');
         //随机获取底图
-        $id = rand(1,3).'.png';
+        $id = rand(1,3).'.jpg';
         $path = "../public/static/admin/images/$id";
-        $image = imagecreatefrompng($path);
+        $image = imagecreatefromjpeg($path);
         //指定字体样式
         $black = imagecolorallocate($image, 3, 25, 154); // 字体颜色 RGB
         $font =  '../public/static/admin/lib/textB.TTF';
@@ -107,7 +107,7 @@ class Image
         $xid = time().rand(1000,9999).'.png';
         header('Content-Type:image/png');
         
-        imagepng($image, "../public/static/admin/img/$xid");
+        imagejpeg($image, "../public/static/admin/img/$xid");
         //释放资源
         imagedestroy($image);
         
