@@ -61,7 +61,7 @@ class Image
         //将字体加入图片中
         imagefttext($image, $font_size, $circle_size, 261, 805, $black1, $font, $str);
         imagefttext($image, 16, $circle_size, 322, 870, $black2, $font, $date);
-        $xid = rand(1000,999).time();
+        $xid = rand(1000,999).time().'.png';
         header('Content-Type:image/png');
         
         imagepng($image, "../public/static/admin/img/$xid");
