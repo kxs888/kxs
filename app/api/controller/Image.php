@@ -50,7 +50,8 @@ class Image
         $path = "../public/static/admin/images/$id";
         $image = imagecreatefrompng($path);
         //指定字体样式
-        $black = imagecolorallocate($image, 240, 66, 52); // 字体颜色 RGB
+        $black1 = imagecolorallocate($image, 240, 66, 52); // 字体颜色 RGB
+        $black2 = imagecolorallocate($image, 255, 105, 180); // 字体颜色 RGB
         $font =  '../public/static/admin/lib/fangzheng.ttf';
         $font_size ='20';
         $circle_size = '0';
@@ -58,8 +59,8 @@ class Image
         $fontBox1 = imagettfbbox($fontSize, 0, $font, $str);
         $fontBox2 = imagettfbbox($fontSize, 0, $font, $date);
         //将字体加入图片中
-        imagefttext($image, $fontSize, $circleSize, 261, 805, $black, $font, $str);
-        imagefttext($image, 16, $circleSize, 322, 870, $black, $font, $date);
+        imagefttext($image, $fontSize, $circleSize, 261, 805, $black1, $font, $str);
+        imagefttext($image, 16, $circleSize, 322, 870, $black2, $font, $date);
         $xid = rand(1000,999).time();
         header('Content-Type:image/png');
         
