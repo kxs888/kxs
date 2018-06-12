@@ -56,8 +56,8 @@ class Image
         $font_size ='20';
         $circle_size = '0';
         $len = strlen($str);
-        $fontBox1 = imagettfbbox($fontSize, 0, $font, $str);
-        $fontBox2 = imagettfbbox($fontSize, 0, $font, $date);
+        $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
+        $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
         //将字体加入图片中
         imagefttext($image, $fontSize, $circleSize, 261, 805, $black1, $font, $str);
         imagefttext($image, 16, $circleSize, 322, 870, $black2, $font, $date);
