@@ -41,7 +41,7 @@ class Image
         return "http://kxs.ruohua.club/static/admin/images/a.jpg";
     }
     
-    public function imgMerge($str,$date){
+    public function imgMergeA($str,$date){
         //接收数据
         $request = Request::instance();
         $str = $request->post('str');
@@ -49,7 +49,7 @@ class Image
         $date = Request::instance()->post('date');
         //随机获取底图
         $id = rand(1,20).'.png';
-        $path = "../public/static/admin/images/$id";
+        $path = "../public/static/admin/images/imgA/$id";
         $image = imagecreatefrompng($path);
         //指定字体样式
         $black1 = imagecolorallocate($image, 240, 66, 52); // 字体颜色 RGB
@@ -58,7 +58,7 @@ class Image
         $circle_size = '0';
         $len = strlen($str);
         if($len <= 2){
-            $font_size = 32;
+            $font_size = 33;
         } else {
             $font_size = 26;
         }
@@ -77,6 +77,41 @@ class Image
         return "http://kxs.ruohua.club/static/admin/img/$xid";
         
         
+    }
+    
+    public function imgMergeB(){
+        $request = Request::instance();
+        $str = $request->post('str');
+        $str = trim($str);
+        $date = Request::instance()->post('date');
+        //随机获取底图
+        $id = rand(1,3).'.png';
+        $path = "../public/static/admin/images/$id";
+        $image = imagecreatefrompng($path);
+        //指定字体样式
+        $black = imagecolorallocate($image, 3, 25, 154); // 字体颜色 RGB
+        $font =  '../public/static/admin/lib/textB.TTF';
+        $font_size = 33;
+        $circle_size = '0';
+        $len = strlen($str);
+        if($len <= 2){
+            $font_size = 33;
+        } else {
+            $font_size = 26;
+        }
+        $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
+        $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
+        //将字体加入图片中
+        imagefttext($image, $font_size, $circle_size, 400, 281, $black, $font, $str);
+        imagefttext($image, 26, $circle_size, 310, 720, $black, $font, $date);
+        $xid = time().rand(1000,9999).'.png';
+        header('Content-Type:image/png');
+        
+        imagepng($image, "../public/static/admin/img/$xid");
+        //释放资源
+        imagedestroy($image);
+        
+        return "http://kxs.ruohua.club/static/admin/img/$xid";
     }
     
     
