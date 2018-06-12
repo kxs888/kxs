@@ -86,7 +86,7 @@ class Image
         $date = Request::instance()->post('date');
         //随机获取底图
         $id = rand(1,3).'.jpg';
-        $path = "../public/static/admin/images/$id";
+        $path = "../public/static/admin/images/imgB/$id";
         $image = imagecreatefromjpeg($path);
         //指定字体样式
         $black = imagecolorallocate($image, 3, 25, 154); // 字体颜色 RGB
