@@ -42,9 +42,9 @@ class Image
     
     public function imgMerge($str,$date){
         //接收数据
-        $str = $this->request->post('str');
+        $str = input('str');
         $str = trim($str);
-        $date = $this->request->post('date');
+        $date = input('date');
         //获取底图
         $id = rand(1,20).'png';
         $path = "../public/static/admin/images/$id";
@@ -65,7 +65,7 @@ class Image
         header('Content-Type:image/png');
         
         imagepng($image, "../public/static/admin/img/$xid");
-        
+        //释放资源
         imagedestroy($image);
         
         return "http://kxs.ruohua.club/static/admin/img/$xid";
