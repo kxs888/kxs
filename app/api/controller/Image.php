@@ -46,7 +46,7 @@ class Image
         $str = trim($str);
         $date = input('date');
         //获取底图
-        $id = rand(1,20).'png';
+        $id = rand(1,20).'.png';
         $path = "../public/static/admin/images/$id";
         $image = imagecreatefrompng($path);
         //指定字体样式
