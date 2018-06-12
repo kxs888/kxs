@@ -64,4 +64,9 @@ class Index extends Common
     }
         return json_encode($array);
     }   
+    
+    public function resetPasswd(){
+        
+        
+    }
 }

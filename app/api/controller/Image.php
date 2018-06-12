@@ -8,11 +8,12 @@ class Image
 
     public function imageMerge()
     {
+        $id = rand(1,3).'jpg';
         
         // 图片一
-        $path1 = '../public/static/admin/images/3.jpg';
+        $path1 = '../public/static/admin/images/$id';
         // 图片二
-        $path2 = '../public/static/admin/images/1.jpg';
+        $path2 = '../public/static/admin/images/$id';
         // 创建图片对象 1
         $image1 = imagecreatefromjpeg($path1);
         $image2 = imagecreatefromjpeg($path2);
@@ -21,7 +22,7 @@ class Image
         // 输出合成图片
         // $imagename = rand(1000,9999).'-'.time().'jpg';
         
-        $name = '你瞅啥！';
+        $name = '';
         $font = '../public/static/admin/lib/fangzheng.ttf';
         $black = imagecolorallocate($image1, 255, 105, 180); // 字体颜色 RGB
         $fontSize = 20;
@@ -38,6 +39,40 @@ class Image
         
         return "http://kxs.ruohua.club/static/admin/images/a.jpg";
     }
+    
+    public function imgMerge($str,$date){
+        //接收数据
+        $str = $this->request->post('str');
+        $str = trim($str);
+        $date = $this->request->post('date');
+        //获取底图
+        $id = rand(1,20).'png';
+        $path = "../public/static/admin/images/$id";
+        $image = imagecreatefrompng($path);
+        //指定字体样式
+        $black = imagecolorallocate($image, 240, 66, 52); // 字体颜色 RGB
+        $font =  '../public/static/admin/lib/fangzheng.ttf';
+        $font_size ='20';
+        $circle_size = '0';
+        $len = strlen($str);
+        $fontBox1 = imagettfbbox($fontSize, 0, $font, $str);
+        $fontBox2 = imagettfbbox($fontSize, 0, $font, $date);
+        //将字体加入图片中
+        imagefttext($image, $fontSize, $circleSize, 261, 805, $black, $font, $str);
+        imagefttext($image, 16, $circleSize, 322, 870, $black, $font, $date);
+        $xid = rand(1000,999).time();
+        header('Content-Type:image/png');
+        
+        imagepng($image, "../public/static/admin/img/$xid");
+        
+        imagedestroy($image);
+        
+        return "http://kxs.ruohua.club/static/admin/img/$xid";
+        
+        
+    }
+    
+    
     // public function textMerge(){
     // $name = input('post.name');
     // $img = rand(1,5).'.jpg';

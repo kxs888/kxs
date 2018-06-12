@@ -131,7 +131,7 @@ class Weichat
      * @param string $is_get_userinfo            
      * @return string
      */
-    public function getCode($url, $is_get_userinfo = true)
+    public static function getCode($url, $is_get_userinfo = true)
     {
         if ($is_get_userinfo) {
             $scope = "snsapi_userinfo";
@@ -149,11 +149,12 @@ class Weichat
      * @return unknown
      */
     // 通过code获取用户信息
-    public function getUserInfo($code)
+    public static function getUserInfo($code)
     {
         $ao = $this->getAuthAccessToken($code);
         $access_token = $ao->access_token;
         $openid = $ao->openid;
+        session_star();
         $url = "https://api.weixin.qq.com/sns/userinfo?access_token=$access_token&openid=$openid&lang=zh_CN";
         $res = json_decode($this->httpGet($url));
         return $res;
