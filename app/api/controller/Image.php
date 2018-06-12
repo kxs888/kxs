@@ -51,9 +51,9 @@ class Image
         $image = imagecreatefrompng($path);
         //指定字体样式
         $black1 = imagecolorallocate($image, 240, 66, 52); // 字体颜色 RGB
-        $black2 = imagecolorallocate($image, 255, 105, 180); // 字体颜色 RGB
+        $black2 = imagecolorallocate($image, 194, 164, 86); // 字体颜色 RGB
         $font =  '../public/static/admin/lib/fangzheng.ttf';
-        $font_size ='33';
+        $font_size ='30';
         $circle_size = '0';
         $len = strlen($str);
         $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
