@@ -59,7 +59,7 @@ class Image
         $len = strlen($str);
         if($len <= 2){
             $font_size = "33px";
-        } else {
+        } else { 
             $font_size = "26px";
         }
         $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
