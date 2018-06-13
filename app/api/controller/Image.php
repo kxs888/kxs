@@ -48,7 +48,7 @@ class Image
         $str = trim($str);
         $date = $request->post('date');
         echo $date;
-        $time = date("Y年m月d日",$date);
+        $time = @date("Y年m月d日",$date);
         echo $time;
         exit();
         //随机获取底图
