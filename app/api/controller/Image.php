@@ -58,9 +58,9 @@ class Image
         $circle_size = '0';
         $len = strlen($str);
         if($len <= 2){
-            $font_size = 38;
+            $font_size = 50;
         } else { 
-            $font_size = 30;
+            $font_size = 33;
         }
 //         $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
 //         $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
