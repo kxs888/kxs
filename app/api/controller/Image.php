@@ -59,10 +59,10 @@ class Image
         $len = strlen($str);
         echo $len;
         exit();
-        if($len <= 2){
+        if($len <= 6){
             $font_size = 36;
             imagefttext($image, $font_size, $circle_size, 255, 805, $black1, $font, $str);
-        } elseif($len >=3) { 
+        } elseif($len >= 9) { 
             $font_size = 30;
             imagefttext($image, $font_size, $circle_size, 240, 805, $black1, $font, $str);
         }
@@ -99,9 +99,9 @@ class Image
 //         $font_size = 33;
         $circle_size = '0';
         $len = strlen($str);
-        if($len <= 2){
+        if($len <= 6){
            imagefttext($image, 26, $circle_size, 374, 281, $black, $font, $str);
-        } elseif($len >=3 ) {
+        } elseif($len >= 9 ) {
             imagefttext($image, 26, $circle_size, 350, 281, $black, $font, $str);
         }
 //         $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
