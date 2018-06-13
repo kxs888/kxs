@@ -105,7 +105,7 @@ class Image
 //         imagefttext($image, $font_size, $circle_size, 374, 281, $black, $font, $str);
         imagefttext($image, 20, $circle_size, 286, 723, $black, $font, $date);
         $xid = time().rand(1000,9999).'.png';
-        header('Content-Type:image/png');
+        header('Content-Type:image/jpeg');
         
         imagejpeg($image, "../public/static/admin/img/$xid");
         //释放资源
