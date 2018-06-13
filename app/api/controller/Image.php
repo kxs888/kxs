@@ -58,7 +58,7 @@ class Image
         $circle_size = '0';
         $len = strlen($str);
         if($len <= 2){
-            $font_size = 33;
+            $font_size = '33px';
         } else {
             $font_size = 26;
         }
