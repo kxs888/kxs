@@ -47,7 +47,7 @@ class Image
         $str = $request->post('str');
         $str = trim($str);
         $date = Request::instance()->post('date');
-        $date = date("Y年m月d日",$date);
+        $date = date("Y年m月d日");
         echo $date.'abc';
         exit();
         //随机获取底图
