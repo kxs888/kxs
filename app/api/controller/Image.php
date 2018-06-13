@@ -59,13 +59,15 @@ class Image
         $len = strlen($str);
         if($len <= 2){
             $font_size = 36;
-        } else { 
-            $font_size = 32;
+            imagefttext($image, $font_size, $circle_size, 255, 805, $black1, $font, $str);
+        } elseif($len >=3) { 
+            $font_size = 26;
+            imagefttext($image, $font_size, $circle_size, 240, 805, $black1, $font, $str);
         }
          $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
          $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
         //将字体加入图片中
-        imagefttext($image, $font_size, $circle_size, 255, 805, $black1, $font, $str);
+//         imagefttext($image, $font_size, $circle_size, 255, 805, $black1, $font, $str);
         imagefttext($image, 28, $circle_size, 285, 870, $black2, $font, $date);
         $xid = time().rand(1000,9999).'.png';
         header('Content-Type:image/png');
