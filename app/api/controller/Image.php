@@ -58,7 +58,7 @@ class Image
         $circle_size = '0';
         $len = strlen($str);
         if($len <= 2){
-            $font_size = '33px';
+            $font_size = 33;
         } else {
             $font_size = 26;
         }
@@ -95,9 +95,9 @@ class Image
         $circle_size = '0';
         $len = strlen($str);
         if($len <= 2){
-           imagefttext($image, '26px', $circle_size, 374, 281, $black, $font, $str);
+           imagefttext($image, 26, $circle_size, 374, 281, $black, $font, $str);
         } elseif($len >=3 ) {
-            imagefttext($image, '26px', $circle_size, 350, 281, $black, $font, $str);
+            imagefttext($image, 26, $circle_size, 350, 281, $black, $font, $str);
         }
 //         $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
 //         $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
