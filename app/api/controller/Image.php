@@ -58,7 +58,7 @@ class Image
         $circle_size = '0';
         $len = strlen($str);
         if($len <= 2){
-            $font_size = 45;
+            $font_size = 40;
         } else { 
             $font_size = 40;
         }
@@ -66,7 +66,7 @@ class Image
          $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
         //将字体加入图片中
         imagefttext($image, $font_size, $circle_size, 261, 805, $black1, $font, $str);
-        imagefttext($image, 26, $circle_size, 310, 870, $black2, $font, $date);
+        imagefttext($image, 30, $circle_size, 305, 870, $black2, $font, $date);
         $xid = time().rand(1000,9999).'.png';
         header('Content-Type:image/png');
         
