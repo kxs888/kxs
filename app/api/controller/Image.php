@@ -84,7 +84,7 @@ class Image
         $str = $request->post('str');
         $str = trim($str);
         $date = Request::instance()->post('date');
-       // $date = date('Y年m月d日');
+        $date = date('Y年m月d日');
         //随机获取底图
         $id = rand(1,3).'.jpg';
         $path = "../public/static/admin/images/imgB/$id";
