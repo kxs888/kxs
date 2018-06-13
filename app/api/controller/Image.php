@@ -64,8 +64,8 @@ class Image
             $font_size = 28;
             imagefttext($image, $font_size, $circle_size, 245, 805, $black1, $font, $str);
         }
-         $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
-         $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
+//          $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
+//          $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
         //将字体加入图片中
 //         imagefttext($image, $font_size, $circle_size, 255, 805, $black1, $font, $str);
         imagefttext($image, 28, $circle_size, 285, 870, $black2, $font, $date);
