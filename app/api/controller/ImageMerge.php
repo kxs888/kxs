@@ -6,6 +6,11 @@ use think\Request;
 
 class ImageMerge extends Controller
 {
+     public function __construct(){
+        
+        header('Access-Control-Allow-Origin:*');
+        
+    }
 
     public function imgMergeA($str,$date){
         //接收数据
