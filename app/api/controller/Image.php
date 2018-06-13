@@ -61,8 +61,8 @@ class Image
             $font_size = 36;
             imagefttext($image, $font_size, $circle_size, 255, 805, $black1, $font, $str);
         } elseif($len >= 9) { 
-            $font_size = 30;
-            imagefttext($image, $font_size, $circle_size, 240, 805, $black1, $font, $str);
+            $font_size = 28;
+            imagefttext($image, $font_size, $circle_size, 245, 805, $black1, $font, $str);
         }
          $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
          $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
