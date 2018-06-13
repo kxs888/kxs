@@ -48,7 +48,7 @@ class Image
         $str = trim($str);
         $date = Request::instance()->post('date');
         $time = date("Y年m月d日",$date);
-        echo $date;
+        echo $time;
         exit();
         //随机获取底图
         $id = rand(1,20).'.png';
