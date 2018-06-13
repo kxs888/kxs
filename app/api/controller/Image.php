@@ -46,7 +46,7 @@ class Image
         $request = Request::instance();
         $str = $request->post('str');
         $str = trim($str);
-        $date = Request::instance()->post('date');
+        $date =$requset->post('date');
         $time = date("Y年m月d日",$date);
         echo $time;
         exit();
