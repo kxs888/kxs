@@ -87,7 +87,7 @@ class Image
         $str = $request->post('str');
         $str = trim($str);
         $date = Request::instance()->post('date');
-        $date = date("Y年m月d日",$dage);
+        $time = substr($date,0,4).'年'.substr($date,5,2).'月'.substr($date,8,2).'日';
         //随机获取底图
         $id = rand(1,3).'.jpg';
         $path = "../public/static/admin/images/imgB/$id";
@@ -107,7 +107,7 @@ class Image
 //         $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
         //将字体加入图片中
 //         imagefttext($image, $font_size, $circle_size, 374, 281, $black, $font, $str);
-        imagefttext($image, 20, $circle_size, 286, 723, $black, $font, $date);
+        imagefttext($image, 20, $circle_size, 286, 723, $black, $font, $time);
         $xid = time().rand(1000,9999).'.jpg';
         header('Content-Type:image/jpeg');
         
