@@ -47,6 +47,7 @@ class Image
         $str = $request->post('str');
         $str = trim($str);
         $date = $request->post('date');
+        echo $date;
         $time = date("Y年m月d日",$date);
         echo $time;
         exit();
