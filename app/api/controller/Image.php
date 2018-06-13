@@ -57,6 +57,8 @@ class Image
         $font =  '../public/static/admin/lib/ku.ttf';
         $circle_size = '0';
         $len = strlen($str);
+        echo $len;
+        exit();
         if($len <= 2){
             $font_size = 36;
             imagefttext($image, $font_size, $circle_size, 255, 805, $black1, $font, $str);
