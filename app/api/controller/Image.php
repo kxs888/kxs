@@ -52,7 +52,7 @@ class Image
         $path = "../public/static/admin/images/imgA/$id";
         $image = imagecreatefrompng($path);
         //指定字体样式
-        $black1 = imagecolorallocate($image, 240, 66, 52); // 字体颜色 RGB
+        $black1 = imagecolorallocate($image, 235, 66, 52); // 字体颜色 RGB
         $black2 = imagecolorallocate($image, 107, 37, 18); // 字体颜色 RGB
         $font =  '../public/static/admin/lib/ku.ttf';
         $circle_size = '0';
@@ -60,7 +60,7 @@ class Image
         if($len <= 2){
             $font_size = 50;
         } else { 
-            $font_size = 33;
+            $font_size = 38;
         }
 //         $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
 //         $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
