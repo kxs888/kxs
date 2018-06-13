@@ -48,8 +48,6 @@ class Image
         $str = trim($str);
         $date = $request->post('date');
         $time = substr($date,0,4).'年'.substr($date,5,2).'月'.substr($date,8,2).'日';
-        echo $time;
-        exit();
         //随机获取底图
         $id = rand(1,20).'.png';
         $path = "../public/static/admin/images/imgA/$id";
@@ -70,8 +68,8 @@ class Image
 //          $fontBox1 = imagettfbbox($font_size, 0, $font, $str);
 //          $fontBox2 = imagettfbbox($font_size, 0, $font, $date);
         //将字体加入图片中
-//         imagefttext($image, $font_size, $circle_size, 255, 805, $black1, $font, $str);
-        imagefttext($image, 28, $circle_size, 285, 870, $black2, $font, $date);
+//         imagefttext($image, $font_size, $circle_size, 255, 805, $black1, $font, $time);
+        imagefttext($image, 28, $circle_size, 285, 870, $black2, $font, $time);
         $xid = time().rand(1000,9999).'.png';
         header('Content-Type:image/png');
         
