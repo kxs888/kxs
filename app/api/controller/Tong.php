@@ -17,7 +17,7 @@ class Tong {
            $num++;
            file_put_contents("count.txt","$num");
            $newnum=file_get_contents("count.txt");
-           fclose("count.txt");
+//            fclose("count.txt");
           return $newnum;
        }
         
