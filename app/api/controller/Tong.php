@@ -40,6 +40,7 @@ class Tong {
                 $newnum=file_get_contents("countu.txt");
                 setcookie("access",1, time()+3600*24);//访问过标记
             }
-        
+            return $newnum;
+      }
     }
 }
