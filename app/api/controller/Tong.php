@@ -3,9 +3,8 @@ namespace app\api\controller;
 
 class Tong {
     
-    protected  static $num = 0;
-    
-    public function tj(){
+    //统计PV 页面访问量
+    public function tjPV(){
        global $num; 
      
        if(!file_exists("count.txt")){
@@ -20,6 +19,27 @@ class Tong {
 //            fclose("count.txt");
           return $newnum;
        }
+        
+    }
+    /*
+     * 统计UV 用户访问量
+     * 通过session识别
+     */
+    public function tjUV(){
+        if(！empty($_COOKIE["access"]) && $_COOKIE["access"]==1){
+            if(!file_exists("countu.txt")){
+                $one_file=fopen("countu.txt","w+");
+                
+                fwrite("count.txtu","1");
+                fclose("$one_file");
+                setcookie("access",1, time()+3600*24); //访问过标记
+            }else{
+                $num=file_get_contents("countu.txt");
+                $num++;
+                file_put_contents("countu.txt","$num");
+                $newnum=file_get_contents("countu.txt");
+                setcookie("access",1, time()+3600*24);//访问过标记
+            }
         
     }
 }
