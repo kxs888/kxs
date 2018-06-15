@@ -6,7 +6,7 @@ use think\Request;
 
 class ImageMerge extends Controller
 {
-     public function __construct(){
+   public  function __construct(){
         
         header('Access-Control-Allow-Origin:*');
         
@@ -41,7 +41,7 @@ class ImageMerge extends Controller
         //将字体加入图片中
         //imagefttext($image, $font_size, $circle_size, 255, 805, $black1, $font, $time);
         imagefttext($image, 28, $circle_size, 285, 870, $black2, $font, $time);
-        $xid = date('Y-m-d',time()).rand(1000,9999).'.png';
+        $xid = time().rand(1000,9999).'.png';
         header('Content-Type:image/png');
 
         imagepng($image, "../public/static/admin/img/$xid");
@@ -79,7 +79,7 @@ class ImageMerge extends Controller
         //将字体加入图片中
         //         imagefttext($image, $font_size, $circle_size, 374, 281, $black, $font, $str);
         imagefttext($image, 20, $circle_size, 286, 723, $black, $font, $time);
-        $xid = date('Y-m-d',time()).rand(1000,9999).'.jpg';
+        $xid = time().rand(1000,9999).'.jpg';
         header('Content-Type:image/jpeg');
 
         imagejpeg($image, "../public/static/admin/img/$xid");

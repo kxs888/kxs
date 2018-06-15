@@ -162,7 +162,7 @@ class Weichat
     // 获取授权access_token
     public function getAuthAccessToken($code)
     {
-        $url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=$this->appId&secret=$appSecret&code=$code&grant_type=authorization_code";
+        $url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=$this->appId&secret=$this->appSecret&code=$code&grant_type=authorization_code";
         $res = json_decode($this->httpGet($url));
         return $res;
     }
