@@ -6,7 +6,7 @@ class Tong {
     protected  static $num = 0;
     
     public function tj(){
-       global $num;
+       global $num; 
        $file_path = "E:/count.txt";
        if(!file_exists($file_path)){
            $one_file=fopen("count.txt","w+"); //建立一个统计文本，如果不存在就创建
