@@ -88,7 +88,42 @@ class ImageMerge extends Controller
 
         return "http://kxs.ruohua.club/static/admin/img/$xid";
     }
-
+        
+    public function yiliImg(){
+        $request = Request::instance();
+        $str = $request->post('str');
+        $str = trim($str);
+         
+        //随机获取底图
+        //         $id = rand(1,3).'.jpg';
+        $id = '1.jpg';
+        $path = "../public/static/admin/images/imgYili/$id";
+        $image = imagecreatefromjpeg($path);
+        //指定字体样式
+        $black = imagecolorallocate($image, 188, 26, 30); // 字体颜色 RGB
+        $font =  '../public/static/admin/lib/yili.ttf';
+        //         $font_size = 33;
+        $circle_size = '0';
+        $len = strlen($str);
+        if($len <= 6){
+            imagefttext($image, 26, $circle_size, 374, 281, $black, $font, $str);
+        } elseif($len >= 9 ) {
+            imagefttext($image, 26, $circle_size, 350, 281, $black, $font, $str);
+        }
+         
+        //将字体加入图片中
+         
+         
+        $xid = time().rand(100,999).'.jpg';
+        header('Content-Type:image/jpeg');
+    
+        imagejpeg($image, "../public/static/admin/img/$xid");
+        //释放资源
+        imagedestroy($image);
+    
+        return 'https://html5.bjsidao.com/static/admin/img/'."$xid";
+    
+    }
 
 
 }
