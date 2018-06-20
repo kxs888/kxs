@@ -26,7 +26,7 @@ class Tong {
      * 通过session识别
      */
     public function tjUV(){
-        if(empty($_COOKIE["access"]) && $_COOKIE["access"] !==1){
+        if(!empty($_COOKIE["access"]) && $_COOKIE["access"]==1){
             if(!file_exists("countu.txt")){
                 $one_file=fopen("countu.txt","w+");
                 

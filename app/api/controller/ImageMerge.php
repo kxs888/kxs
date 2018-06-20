@@ -103,10 +103,10 @@ class ImageMerge extends Controller
         $black = imagecolorallocate($image, 188, 26, 30); // 字体颜色 RGB
         $font =  '../public/static/admin/lib/yili.ttf';
         //         $font_size = 33;
-        $circle_size = '0';
+        $circle_size = '0';  
         $len = strlen($str);
         if($len <= 6){
-            imagefttext($image, 26, $circle_size, 374, 281, $black, $font, $str);
+            imagefttext($image, 30, $circle_size, 268, 720, $black, $font, $str);
         } elseif($len >= 9 ) {
             imagefttext($image, 26, $circle_size, 350, 281, $black, $font, $str);
         }
