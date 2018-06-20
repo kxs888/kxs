@@ -5,21 +5,22 @@ class WeiBo {
     
     protected $AppKey = '3349458625';
     protected $App_secret = '648de87da6b7b2496e70b13270e7646f';
-    protected $redirect_url = '';
+    protected $redirect_url = 'www.baidu.com';
+
     public function __construct(){
-        $AppKey = $this->AppKey;
-        $App_secret = $this->App_secret;
-        
+        $this->AppKey = $AppKey;
+        $this->App_secret = $App_secret;
+        $this->redirect_url = $redirect_url;
     }
    /**
     * 获取code
     * @param  $url 
     * @return code state 
-    * 同意授权后带着code跳转到 direct_url
+    * 同意授权后带着code跳转到 redirect_url
     */
     public function getCode($url){
-        $url = $this->request->post('url');
-        $uri = "https://api.weibo.com/oauth2/authorize?client_id=$AppKey&redirect_uri=$direct_url&response_type=code&state=STATE";
+//         $url = $this->request->post('url');
+        $uri = "https://api.weibo.com/oauth2/authorize?client_id=.$AppKey.&redirect_uri=.$redirect_url.&response_type=code&state=STATE";
         $res = json_decode($this->httpGet($uri));
         return $res;
     
@@ -30,7 +31,7 @@ class WeiBo {
      * @return access_token,expires_in,remind_in,uid
      */
     public function getAccessToken($code){
-        $url = "https://api.weibo.com/oauth2/access_token?client_id=$AppKey&client_secret=$App_secret&grant_type=authorization_code&redirect_uri=$this->redirect_url&code=$code";
+        $url = "https://api.weibo.com/oauth2/access_token?client_id=.$AppKey.&client_secret=.$App_secret.&grant_type=authorization_code&redirect_uri=.$redirect_url.&code=$code";
         $res = json_decode($this->httpGet($url));
         return $res;
     }
