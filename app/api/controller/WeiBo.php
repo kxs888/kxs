@@ -1,7 +1,7 @@
 <?php
 namespace app\api\WeiBo;
-
-class WeiBo {
+use think\Controller;
+class WeiBo extends Controller {
     
     protected $AppKey = '3349458625';
     protected $App_secret = '648de87da6b7b2496e70b13270e7646f';
