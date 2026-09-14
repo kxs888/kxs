@@ -1,5 +1,7 @@
 # TP-admin
 
+CGA 新后端（切片 0 Go 骨架）见 [`backend/README.md`](backend/README.md)。仓库根目录 `make run` / `make test` 会转到 `backend/`。
+
 TP-admin即基于ThinkPHP5拿来即用高性能后台管理系统
 
 
