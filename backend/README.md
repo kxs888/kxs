@@ -30,7 +30,7 @@ curl -s -X POST localhost:8080/api/v1/ping-writes \
 
 `make test` 运行 `go test ./...`。`SM_CRYPTO_ENABLED` 默认 `false`，密钥只走环境变量。
 
-成功信封含 `meta.request_id` / `meta.trace_id`；失败另有 `error.trace_id`。登录成功/失败与 ping-writes 成功均由 service 显式 `audit.Record`（detail 不含病历/JWT）。
+成功信封含 `meta.request_id` / `meta.trace_id`；失败另有 `error.trace_id`。登录成功/失败与 ping-writes 成功均由 service 显式 `audit.Record`（detail 不含病历/JWT）。`GET /me` 含权限占位 `patient.view` / `task.create` / `report.view`。幂等键与 SSE ticket 的 `expires_at` 默认 24h；无 `Idempotency-Key` 或同 key 异 body 返回 4xx 冲突/缺头码，不覆盖已存响应。
 
 ## S0 验收 MUST
 

@@ -12,6 +12,7 @@ type User struct {
 	Username     string    `json:"username"`
 	PasswordHash string    `json:"-" pii:"mask"`
 	DisplayName  string    `json:"display_name"`
+	Permissions  []string  `json:"permissions,omitempty"`
 	CreatedAt    time.Time `json:"created_at"`
 }
 
@@ -60,4 +61,5 @@ type IdempotencyRecord struct {
 	StatusCode   int
 	ResponseBody []byte
 	Completed    bool
+	ExpiresAt    time.Time
 }

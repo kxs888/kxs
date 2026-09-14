@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
@@ -22,6 +24,7 @@ import (
 	"github.com/kxs888/kxs/backend/internal/handler"
 	httpx "github.com/kxs888/kxs/backend/internal/http"
 	"github.com/kxs888/kxs/backend/internal/http/middleware"
+	"github.com/kxs888/kxs/backend/internal/idempotency"
 	"github.com/kxs888/kxs/backend/internal/obs"
 	"github.com/kxs888/kxs/backend/internal/respond"
 	"github.com/kxs888/kxs/backend/internal/service"
@@ -124,40 +127,6 @@ func (m *memOutbox) Enqueue(_ context.Context, topic string, payload map[string]
 func (m *memOutbox) ClaimPending(context.Context, int) ([]domain.OutboxEvent, error) { return nil, nil }
 func (m *memOutbox) MarkPublished(context.Context, uuid.UUID) error                  { return nil }
 
-type memIdem struct {
-	mu   sync.Mutex
-	data map[string]*domain.IdempotencyRecord
-}
-
-func (m *memIdem) BeginOrGet(_ context.Context, key, fingerprint string) (*domain.IdempotencyRecord, bool, error) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	if m.data == nil {
-		m.data = map[string]*domain.IdempotencyRecord{}
-	}
-	if rec, ok := m.data[key]; ok {
-		if rec.Fingerprint != fingerprint {
-			return nil, false, errcode.New(errcode.IdempotencyKeyConflict, 409, "idempotency key reused with different payload")
-		}
-		cp := *rec
-		return &cp, false, nil
-	}
-	rec := &domain.IdempotencyRecord{Key: key, Fingerprint: fingerprint, Completed: false}
-	m.data[key] = rec
-	cp := *rec
-	return &cp, true, nil
-}
-
-func (m *memIdem) Complete(_ context.Context, key string, status int, body []byte) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	rec := m.data[key]
-	rec.StatusCode = status
-	rec.ResponseBody = append([]byte(nil), body...)
-	rec.Completed = true
-	return nil
-}
-
 type memTickets struct {
 	mu   sync.Mutex
 	data map[uuid.UUID]*domain.StreamTicket
@@ -195,7 +164,7 @@ type fx struct {
 	users  *memUsers
 	pings  *memPing
 	audits *audit.Memory
-	idemp  *memIdem
+	idemp  *idempotency.Memory
 }
 
 func newFX(t *testing.T, smOn bool) *fx {
@@ -204,12 +173,18 @@ func newFX(t *testing.T, smOn bool) *fx {
 	if err != nil {
 		t.Fatal(err)
 	}
-	u := &domain.User{ID: uuid.New(), Username: "demo", PasswordHash: hash, DisplayName: "Demo User"}
+	u := &domain.User{
+		ID:           uuid.New(),
+		Username:     "demo",
+		PasswordHash: hash,
+		DisplayName:  "Demo User",
+		Permissions:  auth.PlaceholderPermissions,
+	}
 	users := &memUsers{byName: map[string]*domain.User{u.Username: u}, byID: map[uuid.UUID]*domain.User{u.ID: u}}
 	pings := &memPing{}
 	audits := audit.NewMemory()
 	outbox := &memOutbox{}
-	idemp := &memIdem{data: map[string]*domain.IdempotencyRecord{}}
+	idemp := idempotency.NewMemory()
 	tickets := &memTickets{data: map[uuid.UUID]*domain.StreamTicket{}}
 	aud := audit.New(audits)
 	pub := event.New(outbox)
@@ -299,6 +274,18 @@ func TestHealthReadyLoginMe(t *testing.T) {
 	if rr.Code != 200 {
 		t.Fatalf("me %d %s", rr.Code, rr.Body.String())
 	}
+	me := decodeEnv(t, rr.Body.Bytes())
+	var meData struct {
+		Permissions []string `json:"permissions"`
+	}
+	if err := json.Unmarshal(me.Data, &meData); err != nil {
+		t.Fatal(err)
+	}
+	wantPerms := strings.Join(auth.PlaceholderPermissions, ",")
+	gotPerms := strings.Join(meData.Permissions, ",")
+	if gotPerms != wantPerms {
+		t.Fatalf("B7 permissions %s", gotPerms)
+	}
 	rr = f.do(t, http.MethodGet, "/api/v1/me", "", "", "")
 	if rr.Code != 401 {
 		t.Fatalf("me unauth %d", rr.Code)
@@ -339,6 +326,48 @@ func TestPingWritesIdempotent(t *testing.T) {
 	rr3 := f.do(t, http.MethodPost, "/api/v1/ping-writes", `{"message":"other"}`, tok, "idem-key-abc")
 	if rr3.Code != 409 {
 		t.Fatalf("conflict %d %s", rr3.Code, rr3.Body.String())
+	}
+	e3 := decodeEnv(t, rr3.Body.Bytes())
+	if e3.Code != errcode.IdempotencyKeyConflict {
+		t.Fatalf("conflict code %s", e3.Code)
+	}
+	if e3.Meta.TraceID == "" || e3.Error == nil || e3.Error.TraceID == "" {
+		t.Fatalf("conflict missing trace %+v", e3)
+	}
+	f.pings.mu.Lock()
+	n = len(f.pings.rows)
+	f.pings.mu.Unlock()
+	if n != 1 {
+		t.Fatalf("C3 must not overwrite, rows %d", n)
+	}
+	rr4 := f.do(t, http.MethodPost, "/api/v1/ping-writes", body, tok, "idem-key-abc")
+	if rr4.Code != 201 || rr4.Header().Get("Idempotency-Replayed") != "true" {
+		t.Fatalf("original key must still replay %d %s", rr4.Code, rr4.Body.String())
+	}
+	if rr4.Body.String() != rr1.Body.String() {
+		t.Fatalf("replay overwritten\n%s\n%s", rr1.Body.String(), rr4.Body.String())
+	}
+}
+
+func TestPingWritesRequireIdempotencyKey(t *testing.T) {
+	f := newFX(t, false)
+	tok := f.login(t)
+	rr := f.do(t, http.MethodPost, "/api/v1/ping-writes", `{"message":"hello-s0"}`, tok, "")
+	if rr.Code != 400 {
+		t.Fatalf("C4 want 4xx missing key, got %d %s", rr.Code, rr.Body.String())
+	}
+	e := decodeEnv(t, rr.Body.Bytes())
+	if e.Code != errcode.IdempotencyKeyRequired {
+		t.Fatalf("code %s", e.Code)
+	}
+	if e.Meta.TraceID == "" || e.Error == nil || e.Error.TraceID == "" {
+		t.Fatalf("C4 missing trace %+v", e)
+	}
+	f.pings.mu.Lock()
+	n := len(f.pings.rows)
+	f.pings.mu.Unlock()
+	if n != 0 {
+		t.Fatalf("no key must not write, rows %d", n)
 	}
 }
 
@@ -414,10 +443,23 @@ func TestSSEPlaceholder(t *testing.T) {
 	rr := f.do(t, http.MethodPost, "/api/v1/stream/tickets", "", tok, "")
 	e := decodeEnv(t, rr.Body.Bytes())
 	var data struct {
-		Ticket string `json:"ticket"`
+		Ticket    string `json:"ticket"`
+		ExpiresAt string `json:"expires_at"`
+		ExpiresIn int    `json:"expires_in"`
 	}
 	if err := json.Unmarshal(e.Data, &data); err != nil {
 		t.Fatal(err)
+	}
+	if data.ExpiresIn != int(stream.DefaultTicketTTL.Seconds()) || data.ExpiresIn != 86400 {
+		t.Fatalf("C6 expires_in %d", data.ExpiresIn)
+	}
+	exp, err := time.Parse(time.RFC3339, data.ExpiresAt)
+	if err != nil {
+		t.Fatal(err)
+	}
+	remain := time.Until(exp)
+	if remain < 23*time.Hour || remain > 25*time.Hour {
+		t.Fatalf("C6 expires_at not ~24h: %s remain=%s", data.ExpiresAt, remain)
 	}
 	rr = f.do(t, http.MethodGet, "/api/v1/stream?ticket="+data.Ticket, "", "", "")
 	if rr.Code != 200 {
@@ -516,5 +558,24 @@ func TestAccessLogNoJWT(t *testing.T) {
 	s := buf.String()
 	if strings.Contains(s, "eyJ") {
 		t.Fatalf("jwt in logs: %s", s)
+	}
+}
+
+func TestOpenAPICoversR1(t *testing.T) {
+	b, err := os.ReadFile(filepath.Join("..", "..", "api", "openapi.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(b)
+	for _, needle := range []string{
+		"/healthz", "/readyz", "/api/v1/auth/login", "/api/v1/me", "/api/v1/ping-writes",
+		"request_id", "trace_id", "ErrorObject",
+		"IDEMPOTENCY_KEY_REQUIRED", "IDEMPOTENCY_KEY_CONFLICT",
+		"patient.view", "task.create", "report.view",
+		"expires_at", "86400",
+	} {
+		if !strings.Contains(s, needle) {
+			t.Fatalf("openapi missing %s", needle)
+		}
 	}
 }

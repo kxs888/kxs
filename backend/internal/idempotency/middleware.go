@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kxs888/kxs/backend/internal/crypto"
@@ -14,17 +15,23 @@ import (
 	"github.com/kxs888/kxs/backend/internal/respond"
 )
 
+const DefaultTTL = 24 * time.Hour
+
 type Store interface {
 	BeginOrGet(ctx context.Context, key, fingerprint string) (rec *domain.IdempotencyRecord, isNew bool, err error)
 	Complete(ctx context.Context, key string, status int, responseBody []byte) error
 }
 
 // Middleware 仅应挂在需要幂等的写路由上，禁止全局 Use。
+// C4：无 Idempotency-Key → 4xx；C3：同 key 异 body → 冲突码且不回放覆盖。
 func Middleware(store Store) gin.HandlerFunc {
+	if store == nil {
+		store = NewMemory()
+	}
 	return func(c *gin.Context) {
 		key := strings.TrimSpace(c.GetHeader("Idempotency-Key"))
 		if key == "" {
-			respond.Err(c, errcode.New(errcode.IdempotencyKeyRequired, 400, "Idempotency-Key header required"))
+			respond.Err(c, errcode.IdempotencyRequired())
 			c.Abort()
 			return
 		}
@@ -64,7 +71,7 @@ func Middleware(store Store) gin.HandlerFunc {
 			return
 		}
 		if !isNew && !rec.Completed {
-			respond.Err(c, errcode.New(errcode.IdempotencyKeyConflict, 409, "idempotency key in progress"))
+			respond.Err(c, errcode.IdempotencyConflict("idempotency key in progress"))
 			c.Abort()
 			return
 		}

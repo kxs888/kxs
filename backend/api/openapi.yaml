@@ -100,6 +100,7 @@ components:
           description: 短 TTL 秒数（默认 900）
     MeData:
       type: object
+      required: [id, username, permissions]
       properties:
         id:
           type: string
@@ -108,6 +109,12 @@ components:
           type: string
         display_name:
           type: string
+        permissions:
+          type: array
+          description: S0 RBAC 占位，不代表已实现对应 CRUD
+          items:
+            type: string
+          example: [patient.view, task.create, report.view]
     PingWriteRequest:
       type: object
       required: [message]
@@ -280,7 +287,7 @@ paths:
     post:
       tags: [ping-writes]
       security: [{bearerAuth: []}]
-      summary: 幂等写示例。同 Idempotency-Key 双提交回放且只落一行。成功时 service 显式 audit.Record。
+      summary: 幂等写示例。C4 必须带 Idempotency-Key；同 key 同 body 回放且只落一行；C3 同 key 异 body 返回 IDEMPOTENCY_KEY_CONFLICT 且不覆盖。成功时 service 显式 audit.Record。键 expires_at 默认 24h。
       parameters:
         - in: header
           name: Idempotency-Key
@@ -308,11 +315,23 @@ paths:
                       data:
                         $ref: "#/components/schemas/PingWriteData"
         "400":
-          description: IDEMPOTENCY_KEY_REQUIRED / COMMON_INVALID_ARGUMENT
+          description: C4 无 Idempotency-Key → 4xx；或 COMMON_INVALID_ARGUMENT
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+              example:
+                ok: false
+                code: IDEMPOTENCY_KEY_REQUIRED
+                message: Idempotency-Key header required
+                data: null
+                error:
+                  code: IDEMPOTENCY_KEY_REQUIRED
+                  message: Idempotency-Key header required
+                  trace_id: "..."
+                meta:
+                  request_id: "..."
+                  trace_id: "..."
         "401":
           description: AUTH_UNAUTHORIZED
           content:
@@ -320,7 +339,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "409":
-          description: IDEMPOTENCY_KEY_CONFLICT（同 key 不同 body）
+          description: C3 同 key 异 body → IDEMPOTENCY_KEY_CONFLICT，不回放、不覆盖已存响应
           content:
             application/json:
               schema:
@@ -337,3 +356,32 @@ paths:
                 meta:
                   request_id: "..."
                   trace_id: "..."
+  /api/v1/stream/tickets:
+    post:
+      tags: [auth]
+      security: [{bearerAuth: []}]
+      summary: SSE ticket 占位。expires_at 默认 24h。不记全局 POST 审计。
+      responses:
+        "200":
+          description: ticket
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessEnvelope"
+              example:
+                ok: true
+                code: OK
+                message: ok
+                data:
+                  ticket: "00000000-0000-0000-0000-000000000000"
+                  expires_at: "2026-09-15T03:39:48Z"
+                  expires_in: 86400
+                meta:
+                  request_id: "..."
+                  trace_id: "..."
+        "401":
+          description: AUTH_UNAUTHORIZED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"

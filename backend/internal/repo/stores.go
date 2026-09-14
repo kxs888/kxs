@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -58,33 +59,43 @@ func (r *IdempotencyRepo) BeginOrGet(ctx context.Context, key, fingerprint strin
 	var rec domain.IdempotencyRecord
 	var body []byte
 	err = tx.QueryRow(ctx, `
-		SELECT key, request_fingerprint, COALESCE(status_code, 0), COALESCE(response_body, ''), completed
+		SELECT key, request_fingerprint, COALESCE(status_code, 0), COALESCE(response_body, ''), completed, expires_at
 		FROM idempotency_keys WHERE key = $1 FOR UPDATE`, key).
-		Scan(&rec.Key, &rec.Fingerprint, &rec.StatusCode, &body, &rec.Completed)
+		Scan(&rec.Key, &rec.Fingerprint, &rec.StatusCode, &body, &rec.Completed, &rec.ExpiresAt)
 	if err == nil {
-		if rec.Fingerprint != fingerprint {
-			return nil, false, errcode.New(errcode.IdempotencyKeyConflict, 409, "idempotency key reused with different payload")
+		if !rec.ExpiresAt.IsZero() && !rec.ExpiresAt.After(time.Now()) {
+			if _, delErr := tx.Exec(ctx, `DELETE FROM idempotency_keys WHERE key = $1`, key); delErr != nil {
+				return nil, false, delErr
+			}
+		} else {
+			if rec.Fingerprint != fingerprint {
+				return nil, false, errcode.IdempotencyConflict("idempotency key reused with different payload")
+			}
+			rec.ResponseBody = body
+			if err := tx.Commit(ctx); err != nil {
+				return nil, false, err
+			}
+			return &rec, false, nil
 		}
-		rec.ResponseBody = body
-		if err := tx.Commit(ctx); err != nil {
-			return nil, false, err
-		}
-		return &rec, false, nil
-	}
-	if !errors.Is(err, pgx.ErrNoRows) {
+	} else if !errors.Is(err, pgx.ErrNoRows) {
 		return nil, false, err
 	}
 
 	_, err = tx.Exec(ctx, `
-		INSERT INTO idempotency_keys (key, request_fingerprint, completed)
-		VALUES ($1, $2, FALSE)`, key, fingerprint)
+		INSERT INTO idempotency_keys (key, request_fingerprint, completed, expires_at)
+		VALUES ($1, $2, FALSE, now() + interval '24 hours')`, key, fingerprint)
 	if err != nil {
 		return nil, false, err
 	}
 	if err := tx.Commit(ctx); err != nil {
 		return nil, false, err
 	}
-	return &domain.IdempotencyRecord{Key: key, Fingerprint: fingerprint, Completed: false}, true, nil
+	return &domain.IdempotencyRecord{
+		Key:         key,
+		Fingerprint: fingerprint,
+		Completed:   false,
+		ExpiresAt:   time.Now().Add(24 * time.Hour),
+	}, true, nil
 }
 
 func (r *IdempotencyRepo) Complete(ctx context.Context, key string, status int, responseBody []byte) error {
@@ -94,7 +105,7 @@ func (r *IdempotencyRepo) Complete(ctx context.Context, key string, status int, 
 	_, err := r.pool.Exec(ctx, `
 		UPDATE idempotency_keys
 		SET status_code = $2, response_body = $3, completed = TRUE
-		WHERE key = $1`, key, status, string(responseBody))
+		WHERE key = $1 AND completed = FALSE`, key, status, string(responseBody))
 	return err
 }
 

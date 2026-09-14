@@ -100,6 +100,7 @@ func (a *API) Me(c *gin.Context) {
 		"id":           u.ID,
 		"username":     u.Username,
 		"display_name": u.DisplayName,
+		"permissions":  auth.PermissionsOrPlaceholder(u.Permissions),
 	})
 }
 
@@ -147,7 +148,7 @@ func (a *API) IssueStreamTicket(c *gin.Context) {
 	respond.OK(c, http.StatusOK, map[string]any{
 		"ticket":     t.ID.String(),
 		"expires_at": t.ExpiresAt.UTC().Format("2006-01-02T15:04:05Z07:00"),
-		"expires_in": stream.DefaultTicketTTL,
+		"expires_in": int(stream.DefaultTicketTTL.Seconds()),
 		"note":       "use GET /api/v1/stream?ticket=... ; events never include PHI",
 	})
 }

@@ -83,3 +83,14 @@ func TokenExpired() *Error {
 func TokenInvalid() *Error {
 	return New(AuthTokenInvalid, 401, "access token invalid")
 }
+
+func IdempotencyRequired() *Error {
+	return New(IdempotencyKeyRequired, 400, "Idempotency-Key header required")
+}
+
+func IdempotencyConflict(msg string) *Error {
+	if msg == "" {
+		msg = "idempotency key reused with different payload"
+	}
+	return New(IdempotencyKeyConflict, 409, msg)
+}

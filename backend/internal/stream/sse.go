@@ -13,7 +13,8 @@ import (
 	"github.com/kxs888/kxs/backend/internal/obs"
 )
 
-const DefaultTicketTTL = 60
+// DefaultTicketTTL 是 SSE ticket 默认有效期（C6：expires_at 默认 24h）。
+const DefaultTicketTTL = 24 * time.Hour
 
 type Store interface {
 	InsertTicket(ctx context.Context, userID uuid.UUID, ttlSeconds int) (*domain.StreamTicket, error)
@@ -30,7 +31,7 @@ func New(store Store) *Service {
 }
 
 func (s *Service) Issue(ctx context.Context, userID uuid.UUID) (*domain.StreamTicket, error) {
-	return s.store.InsertTicket(ctx, userID, DefaultTicketTTL)
+	return s.store.InsertTicket(ctx, userID, int(DefaultTicketTTL.Seconds()))
 }
 
 func (s *Service) Validate(ctx context.Context, raw string) (*domain.StreamTicket, error) {

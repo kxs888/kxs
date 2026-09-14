@@ -44,6 +44,7 @@ type LoginResult struct {
 
 func (s *AuthService) Login(ctx context.Context, username, password, ip string) (*LoginResult, error) {
 	fail := func() (*LoginResult, error) {
+		// D2 登录失败：service 显式 audit.Record，禁止全局 POST 自动记。
 		_ = s.audit.Record(ctx, audit.Record{
 			Action:       "auth.login_failed",
 			ResourceType: "user",
@@ -64,6 +65,7 @@ func (s *AuthService) Login(ctx context.Context, username, password, ip string) 
 	if err != nil {
 		return nil, errcode.Internal("issue token")
 	}
+	// D1 登录成功：service 显式 audit.Record。
 	_ = s.audit.Record(ctx, audit.Record{
 		ActorID:      &u.ID,
 		Action:       "auth.login",
@@ -96,7 +98,12 @@ func (s *AuthService) EnsureBootstrap(ctx context.Context, username, password st
 	if err != nil {
 		return err
 	}
-	u := &domain.User{Username: username, PasswordHash: hash, DisplayName: "Demo User"}
+	u := &domain.User{
+		Username:     username,
+		PasswordHash: hash,
+		DisplayName:  "Demo User",
+		Permissions:  auth.PlaceholderPermissions,
+	}
 	if err := s.users.Insert(ctx, u); err != nil {
 		return err
 	}
@@ -125,6 +132,7 @@ func (s *PingService) Create(ctx context.Context, message, ip string) (*domain.P
 	if err != nil {
 		return nil, err
 	}
+	// D3 ping-writes 成功：service 显式 audit.Record。
 	_ = s.audit.Record(ctx, audit.Record{
 		Action:       "ping_write.create",
 		ResourceType: "ping_write",

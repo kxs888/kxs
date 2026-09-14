@@ -49,11 +49,7 @@ func NewRouter(d Deps) http.Handler {
 	authed.GET("/me", d.API.Me)
 	authed.POST("/stream/tickets", d.API.IssueStreamTicket)
 	authed.GET("/tasks", d.API.Tasks)
-	if d.Idempotency != nil {
-		authed.POST("/ping-writes", idempotency.Middleware(d.Idempotency), d.API.PingWrite)
-	} else {
-		authed.POST("/ping-writes", d.API.PingWrite)
-	}
+	authed.POST("/ping-writes", idempotency.Middleware(d.Idempotency), d.API.PingWrite)
 
 	return r
 }

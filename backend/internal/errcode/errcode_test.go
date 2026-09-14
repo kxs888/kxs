@@ -26,4 +26,10 @@ func TestPrefixes(t *testing.T) {
 			t.Fatalf("%s: want AUTH_ prefix", c)
 		}
 	}
+	if !strings.HasPrefix(string(errcode.IdempotencyKeyRequired), "IDEMPOTENCY_") {
+		t.Fatal("C4 code")
+	}
+	if !strings.HasPrefix(string(errcode.IdempotencyKeyConflict), "IDEMPOTENCY_") {
+		t.Fatal("C3 code")
+	}
 }
