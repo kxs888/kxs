@@ -1,0 +1,290 @@
+openapi: 3.0.3
+info:
+  title: CGA API (Slice 0)
+  version: 0.0.0
+  description: |
+    切片 0 框架可运行骨架。统一信封与 `respond.OK` / `respond.Err` 一致。
+    未实现领域返回空列表或 COMMON_NOT_IMPLEMENTED，禁止假装 CRUD。
+    SSE 仅占位事件，不含病历全文；需先用 ticket 再连 stream。
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: health
+  - name: auth
+  - name: ping-writes
+  - name: stream
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Envelope:
+      type: object
+      required: [ok, code, message, data, request_id]
+      properties:
+        ok:
+          type: boolean
+        code:
+          type: string
+          description: OK 或 COMMON_* / AUTH_* / IDEMPOTENCY_* / SM_*
+        message:
+          type: string
+        data:
+          nullable: true
+        request_id:
+          type: string
+    ErrorEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/Envelope"
+        - type: object
+          properties:
+            ok:
+              enum: [false]
+            data:
+              nullable: true
+              description: 失败时恒为 null
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    LoginData:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          example: Bearer
+        expires_in:
+          type: integer
+          description: 短 TTL 秒数（默认 900）
+    MeData:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        display_name:
+          type: string
+    PingWriteRequest:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          maxLength: 256
+    PingWriteData:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        message:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    StreamTicketData:
+      type: object
+      properties:
+        ticket:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+        expires_in:
+          type: integer
+        note:
+          type: string
+paths:
+  /healthz:
+    get:
+      tags: [health]
+      summary: 存活探针（明文，永不国密）
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Envelope"
+              example:
+                ok: true
+                code: OK
+                message: ok
+                data:
+                  status: ok
+                request_id: "..."
+  /readyz:
+    get:
+      tags: [health]
+      summary: 就绪探针，ping PostgreSQL（明文，永不国密）
+      responses:
+        "200":
+          description: ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Envelope"
+        "503":
+          description: database unreachable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+              example:
+                ok: false
+                code: COMMON_UNAVAILABLE
+                message: database unreachable
+                data: null
+                request_id: "..."
+  /metrics:
+    get:
+      tags: [health]
+      summary: 进程 metrics（明文，永不国密）
+      responses:
+        "200":
+          description: prometheus text
+  /api/v1/auth/login:
+    post:
+      tags: [auth]
+      summary: 登录占位（argon2id 校验 + JWT access 短 TTL）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: 成功信封，data 为 token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Envelope"
+        "401":
+          description: AUTH_INVALID_CREDENTIALS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /api/v1/me:
+    get:
+      tags: [auth]
+      security: [{bearerAuth: []}]
+      summary: 当前主体（路由局部 Auth，非全局中间件）
+      responses:
+        "200":
+          description: me
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Envelope"
+        "401":
+          description: AUTH_UNAUTHORIZED / AUTH_TOKEN_*
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /api/v1/ping-writes:
+    post:
+      tags: [ping-writes]
+      security: [{bearerAuth: []}]
+      summary: 幂等写示例。同 Idempotency-Key 双提交回放且只落一行。
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PingWriteRequest"
+      responses:
+        "201":
+          description: 创建或回放
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Envelope"
+        "400":
+          description: IDEMPOTENCY_KEY_REQUIRED
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: IDEMPOTENCY_KEY_CONFLICT（同 key 不同 body）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /api/v1/tasks:
+    get:
+      tags: [auth]
+      security: [{bearerAuth: []}]
+      summary: 任务域占位，返回空列表（非假 CRUD）
+      responses:
+        "200":
+          description: "{ items: [] }"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Envelope"
+  /api/v1/stream/tickets:
+    post:
+      tags: [stream]
+      security: [{bearerAuth: []}]
+      summary: 签发短 TTL SSE ticket
+      responses:
+        "200":
+          description: ticket
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Envelope"
+  /api/v1/stream:
+    get:
+      tags: [stream]
+      summary: |
+        SSE 占位（明文，永不国密）。Query ticket 代替 Authorization（EventSource 不能自定义头）。
+        事件：ready / task(placeholder) / heartbeat。禁止推送病历或评估全文。
+      parameters:
+        - in: query
+          name: ticket
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: text/event-stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                example: |
+                  event: ready
+                  data: {"ok":true,"code":"OK","channel":"tasks","note":"placeholder; no PHI"}
+
+                  event: task
+                  data: {"id":"00000000-0000-0000-0000-000000000000","status":"placeholder"}
+        "401":
+          description: invalid/expired ticket
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
