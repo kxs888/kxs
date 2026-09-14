@@ -49,6 +49,7 @@ func (s *AuthService) Login(ctx context.Context, username, password, ip string) 
 			Action:       "auth.login_failed",
 			ResourceType: "user",
 			ResourceID:   username,
+			Outcome:      "failure",
 			Detail:       map[string]any{"username": username, "result": "invalid_credentials"},
 			IP:           ip,
 		})
@@ -71,6 +72,7 @@ func (s *AuthService) Login(ctx context.Context, username, password, ip string) 
 		Action:       "auth.login",
 		ResourceType: "user",
 		ResourceID:   u.ID.String(),
+		Outcome:      "success",
 		Detail:       map[string]any{"username": u.Username, "result": "ok"},
 		IP:           ip,
 	})
@@ -137,6 +139,7 @@ func (s *PingService) Create(ctx context.Context, message, ip string) (*domain.P
 		Action:       "ping_write.create",
 		ResourceType: "ping_write",
 		ResourceID:   row.ID.String(),
+		Outcome:      "success",
 		Detail:       map[string]any{"id": row.ID.String(), "result": "ok"},
 		IP:           ip,
 	})

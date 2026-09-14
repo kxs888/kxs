@@ -28,9 +28,12 @@ type AuditRecord struct {
 	Action       string         `json:"action"`
 	ResourceType string         `json:"resource_type"`
 	ResourceID   string         `json:"resource_id,omitempty"`
+	Outcome      string         `json:"outcome,omitempty"`
 	Detail       map[string]any `json:"detail"`
 	IP           string         `json:"ip,omitempty"`
+	UserAgent    string         `json:"user_agent,omitempty"`
 	RequestID    string         `json:"request_id,omitempty"`
+	TraceID      string         `json:"trace_id,omitempty"`
 	CreatedAt    time.Time      `json:"created_at"`
 }
 

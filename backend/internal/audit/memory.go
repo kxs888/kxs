@@ -9,7 +9,7 @@ import (
 	"github.com/kxs888/kxs/backend/internal/domain"
 )
 
-// Memory 是 audit_logs 的内存实现，供单测与无库场景。生产走 DB repo。
+// Memory 是 audit_logs 的内存实现，供单测与无 DATABASE_URL 兜底。生产（开 S1 前）必须走 Postgres。
 type Memory struct {
 	mu   sync.Mutex
 	rows []domain.AuditRecord
@@ -32,8 +32,10 @@ func (m *Memory) Insert(_ context.Context, rec *domain.AuditRecord) error {
 	if cp.Detail == nil {
 		cp.Detail = map[string]any{}
 	}
+	cp.Detail = SanitizeDetail(cp.Detail)
 	rec.ID = cp.ID
 	rec.CreatedAt = cp.CreatedAt
+	rec.Detail = cp.Detail
 	m.rows = append(m.rows, cp)
 	return nil
 }

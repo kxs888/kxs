@@ -55,4 +55,7 @@ func TestRecordLoginAndMemoryStore(t *testing.T) {
 	if rows[0].Detail["username"] != "demo" {
 		t.Fatalf("username %v", rows[0].Detail["username"])
 	}
+	if rows[0].Outcome != "failure" {
+		t.Fatalf("outcome %s", rows[0].Outcome)
+	}
 }

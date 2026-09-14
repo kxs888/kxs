@@ -52,7 +52,7 @@ func (a *App) Close() {
 func (a *App) Handler() http.Handler {
 	users := repo.NewUserRepo(a.pool)
 	pings := repo.NewPingWriteRepo(a.pool)
-	audStore := repo.NewAuditRepo(a.pool)
+	audStore := audit.NewStore(a.pool)
 	outboxStore := repo.NewOutboxRepo(a.pool)
 	idemp := repo.NewIdempotencyRepo(a.pool)
 	tickets := repo.NewStreamRepo(a.pool)
@@ -72,7 +72,7 @@ func (a *App) Handler() http.Handler {
 
 func (a *App) EnsureBootstrap(ctx context.Context) error {
 	users := repo.NewUserRepo(a.pool)
-	authSvc := service.NewAuth(users, audit.New(repo.NewAuditRepo(a.pool)), a.cfg.JWTSecret, a.cfg.JWTTTL)
+	authSvc := service.NewAuth(users, audit.New(audit.NewStore(a.pool)), a.cfg.JWTSecret, a.cfg.JWTTTL)
 	return authSvc.EnsureBootstrap(ctx, a.cfg.BootstrapUser, a.cfg.BootstrapPass)
 }
 

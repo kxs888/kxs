@@ -30,9 +30,12 @@ type Record struct {
 	Action       string
 	ResourceType string
 	ResourceID   string
+	Outcome      string
 	Detail       map[string]any
 	IP           string
+	UserAgent    string
 	RequestID    string
+	TraceID      string
 }
 
 // Record 由 service 在关键写路径显式调用。detail_json 不得包含病历全文或 JWT。
@@ -49,14 +52,23 @@ func (s *Service) Record(ctx context.Context, rec Record) error {
 	if rec.RequestID == "" {
 		rec.RequestID = obs.RequestIDFrom(ctx)
 	}
+	if rec.TraceID == "" {
+		rec.TraceID = obs.TraceIDFrom(ctx)
+	}
+	if rec.Outcome == "" {
+		rec.Outcome = defaultOutcome(rec.Action)
+	}
 	row := &domain.AuditRecord{
 		ActorID:      rec.ActorID,
 		Action:       rec.Action,
 		ResourceType: rec.ResourceType,
 		ResourceID:   rec.ResourceID,
+		Outcome:      rec.Outcome,
 		Detail:       SanitizeDetail(rec.Detail),
 		IP:           rec.IP,
+		UserAgent:    rec.UserAgent,
 		RequestID:    rec.RequestID,
+		TraceID:      rec.TraceID,
 	}
 	if err := s.store.Insert(ctx, row); err != nil {
 		obs.AuditLog().ErrorContext(ctx, "audit.insert_failed", "action", rec.Action, "err", err.Error())
@@ -66,8 +78,16 @@ func (s *Service) Record(ctx context.Context, rec Record) error {
 		"action", rec.Action,
 		"resource_type", rec.ResourceType,
 		"resource_id", rec.ResourceID,
+		"outcome", rec.Outcome,
 	)
 	return nil
+}
+
+func defaultOutcome(action string) string {
+	if strings.Contains(action, "fail") {
+		return "failure"
+	}
+	return "success"
 }
 
 func ClientIP(r *http.Request) string {

@@ -10,7 +10,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/kxs888/kxs/backend/internal/audit"
 	"github.com/kxs888/kxs/backend/internal/domain"
 	"github.com/kxs888/kxs/backend/internal/errcode"
 )
@@ -107,27 +106,6 @@ func (r *IdempotencyRepo) Complete(ctx context.Context, key string, status int, 
 		SET status_code = $2, response_body = $3, completed = TRUE
 		WHERE key = $1 AND completed = FALSE`, key, status, string(responseBody))
 	return err
-}
-
-type AuditRepo struct {
-	pool *pgxpool.Pool
-}
-
-func NewAuditRepo(pool *pgxpool.Pool) *AuditRepo {
-	return &AuditRepo{pool: pool}
-}
-
-func (r *AuditRepo) Insert(ctx context.Context, rec *domain.AuditRecord) error {
-	detail, err := json.Marshal(audit.SanitizeDetail(rec.Detail))
-	if err != nil {
-		return err
-	}
-	return r.pool.QueryRow(ctx, `
-		INSERT INTO audit_logs (actor_id, action, resource_type, resource_id, detail_json, ip, request_id)
-		VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7)
-		RETURNING id, created_at`,
-		rec.ActorID, rec.Action, rec.ResourceType, rec.ResourceID, detail, rec.IP, rec.RequestID,
-	).Scan(&rec.ID, &rec.CreatedAt)
 }
 
 type OutboxRepo struct {

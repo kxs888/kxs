@@ -32,6 +32,23 @@ curl -s -X POST localhost:8080/api/v1/ping-writes \
 
 成功信封含 `meta.request_id` / `meta.trace_id`；失败另有 `error.trace_id`。登录成功/失败与 ping-writes 成功均由 service 显式 `audit.Record`（detail 不含病历/JWT）。`GET /me` 含权限占位 `patient.view` / `task.create` / `report.view`。幂等键与 SSE ticket 的 `expires_at` 默认 24h；无 `Idempotency-Key` 或同 key 异 body 返回 4xx 冲突/缺头码，不覆盖已存响应。
 
+## 迁移（S1 前必须持久 audit_logs）
+
+`make run` / 进程启动时对 `DATABASE_URL` **自动 `migrate up`**（golang-migrate + `backend/migrations/*.sql`）。
+
+手动：
+
+```bash
+cd backend
+cp .env.example .env   # 需有效 DATABASE_URL
+make migrate           # up（创建/补齐 audit_logs 等框架表）
+make migrate-down      # 回滚最近一步（慎用）
+```
+
+- `000001_framework` 创建 `audit_logs`；`000004_audit_logs` 补齐 `outcome` / `trace_id` / `user_agent` 等字段，up/down 成对。
+- 审计实现：有 `DATABASE_URL` 时 `internal/audit.Postgres`（pgx）写入表；**无 `DATABASE_URL` 时 Memory 兜底**（仅开发/单测，开 S1 前生产必须走 Postgres）。
+- `detail_json` 经 `SanitizeDetail`，不落密码 / JWT / 病历。
+
 ## S0 验收 MUST
 
 | 项 | 要求 |

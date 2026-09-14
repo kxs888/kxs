@@ -56,3 +56,28 @@ func Migrate(databaseURL string) error {
 	obs.App().Info("migrations applied")
 	return nil
 }
+
+func MigrateDown(databaseURL string) error {
+	src, err := iofs.New(migrations.SQL, ".")
+	if err != nil {
+		return fmt.Errorf("migration source: %w", err)
+	}
+	db, err := sql.Open("pgx", databaseURL)
+	if err != nil {
+		return fmt.Errorf("migration sql open: %w", err)
+	}
+	defer db.Close()
+	driver, err := pgxmigrate.WithInstance(db, &pgxmigrate.Config{})
+	if err != nil {
+		return fmt.Errorf("migration driver: %w", err)
+	}
+	m, err := migrate.NewWithInstance("iofs", src, "pgx5", driver)
+	if err != nil {
+		return fmt.Errorf("migrate: %w", err)
+	}
+	if err := m.Steps(-1); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		return fmt.Errorf("migrate down: %w", err)
+	}
+	obs.App().Info("migrations stepped down")
+	return nil
+}
