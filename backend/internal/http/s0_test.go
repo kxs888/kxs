@@ -108,20 +108,6 @@ func (m *memPing) Insert(_ context.Context, message string) (*domain.PingWrite, 
 	return &p, nil
 }
 
-type memAudit struct {
-	mu   sync.Mutex
-	rows []domain.AuditRecord
-}
-
-func (m *memAudit) Insert(_ context.Context, rec *domain.AuditRecord) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	rec.ID = uuid.New()
-	rec.CreatedAt = time.Now().UTC()
-	m.rows = append(m.rows, *rec)
-	return nil
-}
-
 type memOutbox struct {
 	mu   sync.Mutex
 	rows []domain.OutboxEvent
@@ -208,7 +194,7 @@ type fx struct {
 	h      http.Handler
 	users  *memUsers
 	pings  *memPing
-	audits *memAudit
+	audits *audit.Memory
 	idemp  *memIdem
 }
 
@@ -221,7 +207,7 @@ func newFX(t *testing.T, smOn bool) *fx {
 	u := &domain.User{ID: uuid.New(), Username: "demo", PasswordHash: hash, DisplayName: "Demo User"}
 	users := &memUsers{byName: map[string]*domain.User{u.Username: u}, byID: map[uuid.UUID]*domain.User{u.ID: u}}
 	pings := &memPing{}
-	audits := &memAudit{}
+	audits := audit.NewMemory()
 	outbox := &memOutbox{}
 	idemp := &memIdem{data: map[string]*domain.IdempotencyRecord{}}
 	tickets := &memTickets{data: map[uuid.UUID]*domain.StreamTicket{}}
@@ -298,6 +284,12 @@ func TestHealthReadyLoginMe(t *testing.T) {
 	if !e.OK || e.Code != errcode.OK {
 		t.Fatalf("%+v", e)
 	}
+	if e.Meta.RequestID == "" || e.Meta.TraceID == "" {
+		t.Fatalf("healthz meta %+v", e.Meta)
+	}
+	if rr.Header().Get("X-Trace-Id") == "" || rr.Header().Get("Traceparent") == "" {
+		t.Fatalf("trace headers %+v", rr.Header())
+	}
 	rr = f.do(t, http.MethodGet, "/readyz", "", "", "")
 	if rr.Code != 200 {
 		t.Fatalf("readyz %d %s", rr.Code, rr.Body.String())
@@ -314,6 +306,9 @@ func TestHealthReadyLoginMe(t *testing.T) {
 	e = decodeEnv(t, rr.Body.Bytes())
 	if e.Code != errcode.AuthUnauthorized {
 		t.Fatalf("code %s", e.Code)
+	}
+	if e.Error == nil || e.Error.TraceID == "" || e.Meta.TraceID == "" {
+		t.Fatalf("unauth missing trace %+v %+v", e.Error, e.Meta)
 	}
 }
 
@@ -371,15 +366,45 @@ func TestAuditExplicitNotGlobalPOST(t *testing.T) {
 	if rr.Code != 200 {
 		t.Fatalf("ticket %d %s", rr.Code, rr.Body.String())
 	}
-	f.audits.mu.Lock()
-	n := len(f.audits.rows)
-	actions := make([]string, 0, n)
-	for _, r := range f.audits.rows {
+	rows := f.audits.Snapshot()
+	actions := make([]string, 0, len(rows))
+	for _, r := range rows {
 		actions = append(actions, r.Action)
 	}
-	f.audits.mu.Unlock()
-	if n != 1 || actions[0] != "auth.login" {
+	if len(rows) != 1 || actions[0] != "auth.login" {
 		t.Fatalf("audit should only be explicit login, got %v", actions)
+	}
+}
+
+func TestLoginFailAndPingWriteAudit(t *testing.T) {
+	f := newFX(t, false)
+	rr := f.do(t, http.MethodPost, "/api/v1/auth/login", `{"username":"demo","password":"wrong-pass"}`, "", "")
+	if rr.Code != 401 {
+		t.Fatalf("login fail %d %s", rr.Code, rr.Body.String())
+	}
+	e := decodeEnv(t, rr.Body.Bytes())
+	if e.Error == nil || e.Error.TraceID == "" {
+		t.Fatalf("login fail error %+v", e)
+	}
+	tok := f.login(t)
+	rr = f.do(t, http.MethodPost, "/api/v1/ping-writes", `{"message":"hello-s0"}`, tok, "idem-audit-001")
+	if rr.Code != 201 {
+		t.Fatalf("ping %d %s", rr.Code, rr.Body.String())
+	}
+	_ = f.do(t, http.MethodPost, "/api/v1/stream/tickets", "", tok, "")
+	actions := map[string]int{}
+	for _, r := range f.audits.Snapshot() {
+		actions[r.Action]++
+		raw, _ := json.Marshal(r.Detail)
+		if strings.Contains(string(raw), "eyJ") || strings.Contains(string(raw), "wrong-pass") || strings.Contains(string(raw), "病历") {
+			t.Fatalf("forbidden audit detail %s", raw)
+		}
+	}
+	if actions["auth.login_failed"] != 1 || actions["auth.login"] != 1 || actions["ping_write.create"] != 1 {
+		t.Fatalf("actions %+v", actions)
+	}
+	if _, ok := actions["stream.ticket"]; ok {
+		t.Fatal("stream ticket must not be auto-audited")
 	}
 }
 

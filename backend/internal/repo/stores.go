@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/kxs888/kxs/backend/internal/audit"
 	"github.com/kxs888/kxs/backend/internal/domain"
 	"github.com/kxs888/kxs/backend/internal/errcode"
 )
@@ -106,7 +107,7 @@ func NewAuditRepo(pool *pgxpool.Pool) *AuditRepo {
 }
 
 func (r *AuditRepo) Insert(ctx context.Context, rec *domain.AuditRecord) error {
-	detail, err := json.Marshal(sanitizeAuditDetail(rec.Detail))
+	detail, err := json.Marshal(audit.SanitizeDetail(rec.Detail))
 	if err != nil {
 		return err
 	}
@@ -116,33 +117,6 @@ func (r *AuditRepo) Insert(ctx context.Context, rec *domain.AuditRecord) error {
 		RETURNING id, created_at`,
 		rec.ActorID, rec.Action, rec.ResourceType, rec.ResourceID, detail, rec.IP, rec.RequestID,
 	).Scan(&rec.ID, &rec.CreatedAt)
-}
-
-var forbiddenAuditKeys = map[string]struct{}{
-	"medical_record": {},
-	"note_full":      {},
-	"note":           {},
-	"assessment":     {},
-	"phi":            {},
-	"password":       {},
-	"access_token":   {},
-	"jwt":            {},
-	"body":           {},
-	"content":        {},
-}
-
-func sanitizeAuditDetail(in map[string]any) map[string]any {
-	if in == nil {
-		return map[string]any{}
-	}
-	out := make(map[string]any, len(in))
-	for k, v := range in {
-		if _, bad := forbiddenAuditKeys[k]; bad {
-			continue
-		}
-		out[k] = v
-	}
-	return out
 }
 
 type OutboxRepo struct {

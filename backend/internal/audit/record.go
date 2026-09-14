@@ -35,7 +35,7 @@ type Record struct {
 	RequestID    string
 }
 
-// Record 由 service 在关键写路径显式调用。detail 不得包含病历全文。
+// Record 由 service 在关键写路径显式调用。detail_json 不得包含病历全文或 JWT。
 func (s *Service) Record(ctx context.Context, rec Record) error {
 	if s == nil || s.store == nil {
 		return nil
@@ -54,7 +54,7 @@ func (s *Service) Record(ctx context.Context, rec Record) error {
 		Action:       rec.Action,
 		ResourceType: rec.ResourceType,
 		ResourceID:   rec.ResourceID,
-		Detail:       rec.Detail,
+		Detail:       SanitizeDetail(rec.Detail),
 		IP:           rec.IP,
 		RequestID:    rec.RequestID,
 	}

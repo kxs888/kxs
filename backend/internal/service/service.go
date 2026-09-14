@@ -43,12 +43,22 @@ type LoginResult struct {
 }
 
 func (s *AuthService) Login(ctx context.Context, username, password, ip string) (*LoginResult, error) {
-	u, err := s.users.GetByUsername(ctx, username)
-	if err != nil {
+	fail := func() (*LoginResult, error) {
+		_ = s.audit.Record(ctx, audit.Record{
+			Action:       "auth.login_failed",
+			ResourceType: "user",
+			ResourceID:   username,
+			Detail:       map[string]any{"username": username, "result": "invalid_credentials"},
+			IP:           ip,
+		})
 		return nil, errcode.InvalidCredentials()
 	}
+	u, err := s.users.GetByUsername(ctx, username)
+	if err != nil {
+		return fail()
+	}
 	if !auth.VerifyPassword(password, u.PasswordHash) {
-		return nil, errcode.InvalidCredentials()
+		return fail()
 	}
 	tok, exp, err := auth.IssueAccess(s.secret, s.ttl, u.ID, u.Username, s.now())
 	if err != nil {
@@ -59,7 +69,7 @@ func (s *AuthService) Login(ctx context.Context, username, password, ip string) 
 		Action:       "auth.login",
 		ResourceType: "user",
 		ResourceID:   u.ID.String(),
-		Detail:       map[string]any{"username": u.Username},
+		Detail:       map[string]any{"username": u.Username, "result": "ok"},
 		IP:           ip,
 	})
 	return &LoginResult{AccessToken: tok, TokenType: "Bearer", ExpiresIn: exp}, nil
@@ -119,7 +129,7 @@ func (s *PingService) Create(ctx context.Context, message, ip string) (*domain.P
 		Action:       "ping_write.create",
 		ResourceType: "ping_write",
 		ResourceID:   row.ID.String(),
-		Detail:       map[string]any{"id": row.ID.String()},
+		Detail:       map[string]any{"id": row.ID.String(), "result": "ok"},
 		IP:           ip,
 	})
 	_ = s.outbox.Enqueue(ctx, "ping_write.created", map[string]any{"id": row.ID.String()})

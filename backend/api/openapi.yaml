@@ -4,15 +4,14 @@ info:
   version: 0.0.0
   description: |
     切片 0 框架可运行骨架。统一信封与 `respond.OK` / `respond.Err` 一致。
-    未实现领域返回空列表或 COMMON_NOT_IMPLEMENTED，禁止假装 CRUD。
-    SSE 仅占位事件，不含病历全文；需先用 ticket 再连 stream。
+    成功：`ok/code/message/data/meta`；失败另含 `error`（code/message/trace_id）。
+    `meta.request_id` 与 `meta.trace_id` 必有。未实现领域禁止假装 CRUD。
 servers:
   - url: http://localhost:8080
 tags:
   - name: health
   - name: auth
   - name: ping-writes
-  - name: stream
 components:
   securitySchemes:
     bearerAuth:
@@ -20,41 +19,76 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    Meta:
+      type: object
+      required: [request_id, trace_id]
+      properties:
+        request_id:
+          type: string
+        trace_id:
+          type: string
+          description: 与 X-Trace-Id / Traceparent 对应
+    ErrorObject:
+      type: object
+      required: [code, message, trace_id]
+      properties:
+        code:
+          type: string
+          description: COMMON_* / AUTH_* / IDEMPOTENCY_* / SM_*
+        message:
+          type: string
+        trace_id:
+          type: string
     Envelope:
       type: object
-      required: [ok, code, message, data, request_id]
+      required: [ok, code, message, data, meta]
       properties:
         ok:
           type: boolean
         code:
           type: string
-          description: OK 或 COMMON_* / AUTH_* / IDEMPOTENCY_* / SM_*
         message:
           type: string
-        data:
-          nullable: true
-        request_id:
-          type: string
+        data: {}
+        error:
+          $ref: "#/components/schemas/ErrorObject"
+        meta:
+          $ref: "#/components/schemas/Meta"
+    SuccessEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/Envelope"
+        - type: object
+          properties:
+            ok:
+              enum: [true]
+            code:
+              enum: [OK]
     ErrorEnvelope:
       allOf:
         - $ref: "#/components/schemas/Envelope"
         - type: object
+          required: [error, meta]
           properties:
             ok:
               enum: [false]
             data:
               nullable: true
               description: 失败时恒为 null
+            error:
+              $ref: "#/components/schemas/ErrorObject"
     LoginRequest:
       type: object
       required: [username, password]
       properties:
         username:
           type: string
+          example: demo
         password:
           type: string
+          example: demo-pass-change-me
     LoginData:
       type: object
+      required: [access_token, token_type, expires_in]
       properties:
         access_token:
           type: string
@@ -92,18 +126,21 @@ components:
         created_at:
           type: string
           format: date-time
-    StreamTicketData:
+    HealthData:
       type: object
       properties:
-        ticket:
+        status:
           type: string
-        expires_at:
+          example: ok
+    ReadyData:
+      type: object
+      properties:
+        status:
           type: string
-          format: date-time
-        expires_in:
-          type: integer
-        note:
+          example: ready
+        db:
           type: string
+          example: ok
 paths:
   /healthz:
     get:
@@ -115,14 +152,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Envelope"
+                $ref: "#/components/schemas/SuccessEnvelope"
               example:
                 ok: true
                 code: OK
                 message: ok
                 data:
                   status: ok
-                request_id: "..."
+                meta:
+                  request_id: "116b22a61e080c30e88dfbeed31ac53a"
+                  trace_id: "a1b2c3d4e5f6789012345678abcdef01"
   /readyz:
     get:
       tags: [health]
@@ -133,7 +172,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Envelope"
+                $ref: "#/components/schemas/SuccessEnvelope"
+              example:
+                ok: true
+                code: OK
+                message: ok
+                data:
+                  status: ready
+                  db: ok
+                meta:
+                  request_id: "..."
+                  trace_id: "..."
         "503":
           description: database unreachable
           content:
@@ -145,18 +194,17 @@ paths:
                 code: COMMON_UNAVAILABLE
                 message: database unreachable
                 data: null
-                request_id: "..."
-  /metrics:
-    get:
-      tags: [health]
-      summary: 进程 metrics（明文，永不国密）
-      responses:
-        "200":
-          description: prometheus text
+                error:
+                  code: COMMON_UNAVAILABLE
+                  message: database unreachable
+                  trace_id: "..."
+                meta:
+                  request_id: "..."
+                  trace_id: "..."
   /api/v1/auth/login:
     post:
       tags: [auth]
-      summary: 登录占位（argon2id 校验 + JWT access 短 TTL）
+      summary: 登录占位（argon2id + JWT access 短 TTL）。演示账号 demo / demo-pass-change-me。
       requestBody:
         required: true
         content:
@@ -165,17 +213,34 @@ paths:
               $ref: "#/components/schemas/LoginRequest"
       responses:
         "200":
-          description: 成功信封，data 为 token
+          description: 成功信封，data 为 LoginData
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Envelope"
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/LoginData"
         "401":
-          description: AUTH_INVALID_CREDENTIALS
+          description: AUTH_INVALID_CREDENTIALS（service 显式 audit auth.login_failed）
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+              example:
+                ok: false
+                code: AUTH_INVALID_CREDENTIALS
+                message: invalid username or password
+                data: null
+                error:
+                  code: AUTH_INVALID_CREDENTIALS
+                  message: invalid username or password
+                  trace_id: "..."
+                meta:
+                  request_id: "..."
+                  trace_id: "..."
   /api/v1/me:
     get:
       tags: [auth]
@@ -187,18 +252,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Envelope"
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/MeData"
         "401":
           description: AUTH_UNAUTHORIZED / AUTH_TOKEN_*
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+              example:
+                ok: false
+                code: AUTH_UNAUTHORIZED
+                message: missing authorization
+                data: null
+                error:
+                  code: AUTH_UNAUTHORIZED
+                  message: missing authorization
+                  trace_id: "..."
+                meta:
+                  request_id: "..."
+                  trace_id: "..."
   /api/v1/ping-writes:
     post:
       tags: [ping-writes]
       security: [{bearerAuth: []}]
-      summary: 幂等写示例。同 Idempotency-Key 双提交回放且只落一行。
+      summary: 幂等写示例。同 Idempotency-Key 双提交回放且只落一行。成功时 service 显式 audit.Record。
       parameters:
         - in: header
           name: Idempotency-Key
@@ -219,9 +301,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Envelope"
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/PingWriteData"
         "400":
-          description: IDEMPOTENCY_KEY_REQUIRED
+          description: IDEMPOTENCY_KEY_REQUIRED / COMMON_INVALID_ARGUMENT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: AUTH_UNAUTHORIZED
           content:
             application/json:
               schema:
@@ -232,59 +325,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
-  /api/v1/tasks:
-    get:
-      tags: [auth]
-      security: [{bearerAuth: []}]
-      summary: 任务域占位，返回空列表（非假 CRUD）
-      responses:
-        "200":
-          description: "{ items: [] }"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Envelope"
-  /api/v1/stream/tickets:
-    post:
-      tags: [stream]
-      security: [{bearerAuth: []}]
-      summary: 签发短 TTL SSE ticket
-      responses:
-        "200":
-          description: ticket
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Envelope"
-  /api/v1/stream:
-    get:
-      tags: [stream]
-      summary: |
-        SSE 占位（明文，永不国密）。Query ticket 代替 Authorization（EventSource 不能自定义头）。
-        事件：ready / task(placeholder) / heartbeat。禁止推送病历或评估全文。
-      parameters:
-        - in: query
-          name: ticket
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: text/event-stream
-          content:
-            text/event-stream:
-              schema:
-                type: string
-                example: |
-                  event: ready
-                  data: {"ok":true,"code":"OK","channel":"tasks","note":"placeholder; no PHI"}
-
-                  event: task
-                  data: {"id":"00000000-0000-0000-0000-000000000000","status":"placeholder"}
-        "401":
-          description: invalid/expired ticket
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
+              example:
+                ok: false
+                code: IDEMPOTENCY_KEY_CONFLICT
+                message: idempotency key reused with different payload
+                data: null
+                error:
+                  code: IDEMPOTENCY_KEY_CONFLICT
+                  message: idempotency key reused with different payload
+                  trace_id: "..."
+                meta:
+                  request_id: "..."
+                  trace_id: "..."

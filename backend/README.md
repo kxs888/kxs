@@ -30,6 +30,8 @@ curl -s -X POST localhost:8080/api/v1/ping-writes \
 
 `make test` 运行 `go test ./...`。`SM_CRYPTO_ENABLED` 默认 `false`，密钥只走环境变量。
 
+成功信封含 `meta.request_id` / `meta.trace_id`；失败另有 `error.trace_id`。登录成功/失败与 ping-writes 成功均由 service 显式 `audit.Record`（detail 不含病历/JWT）。
+
 ## S0 验收 MUST
 
 | 项 | 要求 |

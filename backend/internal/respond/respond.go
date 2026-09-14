@@ -7,17 +7,32 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kxs888/kxs/backend/internal/crypto"
 	"github.com/kxs888/kxs/backend/internal/errcode"
 	"github.com/kxs888/kxs/backend/internal/obs"
 )
 
 // Envelope 是对外唯一 JSON 形状，与 api/openapi.yaml 保持一致。
 type Envelope struct {
-	OK        bool            `json:"ok"`
-	Code      errcode.Code    `json:"code"`
-	Message   string          `json:"message"`
-	Data      json.RawMessage `json:"data"`
-	RequestID string          `json:"request_id"`
+	OK      bool            `json:"ok"`
+	Code    errcode.Code    `json:"code"`
+	Message string          `json:"message"`
+	Data    json.RawMessage `json:"data"`
+	Error   *ErrorBody      `json:"error,omitempty"`
+	Meta    Meta            `json:"meta"`
+}
+
+// Meta 出现在成功与失败信封中，含 request_id 与 trace_id。
+type Meta struct {
+	RequestID string `json:"request_id"`
+	TraceID   string `json:"trace_id"`
+}
+
+// ErrorBody 失败时的 error 对象，必须带 trace_id。
+type ErrorBody struct {
+	Code    errcode.Code `json:"code"`
+	Message string       `json:"message"`
+	TraceID string       `json:"trace_id"`
 }
 
 // OK 写入成功信封。data 为 nil 时输出 JSON null。
@@ -27,12 +42,13 @@ func OK(c *gin.Context, status int, data any) {
 		Err(c, errcode.Internal("encode response"))
 		return
 	}
+	meta := metaFrom(c)
 	write(c, status, Envelope{
-		OK:        true,
-		Code:      errcode.OK,
-		Message:   "ok",
-		Data:      raw,
-		RequestID: obs.RequestIDFrom(c.Request.Context()),
+		OK:      true,
+		Code:    errcode.OK,
+		Message: "ok",
+		Data:    raw,
+		Meta:    meta,
 	})
 }
 
@@ -43,13 +59,28 @@ func Err(c *gin.Context, err error) {
 		obs.App().ErrorContext(c.Request.Context(), "respond.untyped_error", "err", err.Error())
 		e = errcode.Internal("internal error")
 	}
+	meta := metaFrom(c)
 	write(c, e.HTTP, Envelope{
-		OK:        false,
-		Code:      e.Code,
-		Message:   e.Message,
-		Data:      json.RawMessage("null"),
-		RequestID: obs.RequestIDFrom(c.Request.Context()),
+		OK:      false,
+		Code:    e.Code,
+		Message: e.Message,
+		Data:    json.RawMessage("null"),
+		Error:   &ErrorBody{Code: e.Code, Message: e.Message, TraceID: meta.TraceID},
+		Meta:    meta,
 	})
+}
+
+func metaFrom(c *gin.Context) Meta {
+	ctx := c.Request.Context()
+	rid := obs.RequestIDFrom(ctx)
+	tid := obs.TraceIDFrom(ctx)
+	if rid == "" {
+		rid, _ = crypto.RandomHex(16)
+	}
+	if tid == "" {
+		tid = rid
+	}
+	return Meta{RequestID: rid, TraceID: tid}
 }
 
 func marshalData(data any) (json.RawMessage, error) {
@@ -71,8 +102,11 @@ func marshalData(data any) (json.RawMessage, error) {
 
 func write(c *gin.Context, status int, env Envelope) {
 	c.Header("Content-Type", "application/json; charset=utf-8")
-	if rid := env.RequestID; rid != "" {
-		c.Header("X-Request-ID", rid)
+	if env.Meta.RequestID != "" {
+		c.Header("X-Request-ID", env.Meta.RequestID)
+	}
+	if env.Meta.TraceID != "" {
+		c.Header("X-Trace-Id", env.Meta.TraceID)
 	}
 	c.Status(status)
 	enc := json.NewEncoder(c.Writer)
